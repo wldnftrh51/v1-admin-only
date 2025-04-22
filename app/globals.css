@@ -14,8 +14,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ededed;
+    --foreground: #0a0a0a;
   }
 }
 
@@ -23,4 +23,20 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.bg-sidebar {
+  background-color: #152259;
+}
+
+.bg-hover-sidebar {
+  background-color: #509CDB;
+}
+
+.bg-hover-sidebar:hover{
+  background-color: #1B56FD;
+}
+
+.icon-color{
+  color-scheme: #13296A;
 }
