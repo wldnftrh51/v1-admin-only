@@ -25,18 +25,27 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.bg-sidebar {
-  background-color: #152259;
-}
-
 .bg-hover-sidebar {
-  background-color: #509CDB;
+  background-color: #26A69A ;
 }
 
 .bg-hover-sidebar:hover{
-  background-color: #1B56FD;
+  background-color: #ffffff ;
 }
 
 .icon-color{
   color-scheme: #13296A;
 }
+
+.sidebar-color{
+  background-color: #1C3F3F;
+}
+
+.bg-btn{
+  background-color: #26A69A;
+}
+
+.bg-btn:hover{
+  background-color: #004D40 ;
+}
+

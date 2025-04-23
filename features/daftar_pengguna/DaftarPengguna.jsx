@@ -14,7 +14,7 @@ export default function HalamanDaftarPengguna() {
                     <button className="text-sm text-gray-600 hover:underline font-semibold">Log out</button>
                 </div>
 
-                <div className="overflow-x-auto bg-white rounded-lg shadow mt-15">
+                <div className="overflow-x-auto bg-black rounded-lg shadow mt-15">
                     <table className="min-w-full text-sm text-left">
                         <thead className="bg-white text-gray-700">
                             <tr>
@@ -28,7 +28,7 @@ export default function HalamanDaftarPengguna() {
                             {dataPengguna.map((item, index) => (
                                 <tr
                                     key={index}
-                                    className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}
+                                    className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
                                 >
                                     <td className="px-6 py-4">{item.nama}</td>
                                     <td className="px-6 py-4">{item.username}</td>
@@ -41,7 +41,7 @@ export default function HalamanDaftarPengguna() {
                 </div>
 
                 <div className="flex justify-end mt-6">
-                    <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded shadow">
+                    <button className="bg-btn text-white font-semibold py-2 px-4 rounded shadow">
                         Tambah Pengguna
                     </button>
                 </div>

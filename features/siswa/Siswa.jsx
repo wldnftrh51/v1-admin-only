@@ -47,7 +47,7 @@ export default function HalamanSiswa() {
     <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 bg-gray-50">
       <div className="flex-1 p-6 bg-[#F5F6FA] min-h-screen w-full">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Halaman Guru</h1>
+          <h1 className="text-3xl font-bold text-gray-800">Halaman Siswa</h1>
           <button className="text-sm text-gray-600 hover:underline font-semibold">Log out</button>
         </div>
 
@@ -99,10 +99,10 @@ export default function HalamanSiswa() {
         </div>
 
         <div className="mt-4 flex justify-end gap-2">
-          <button className="px-4 py-2 border border-blue-500 text-blue-500 text-sm rounded hover:bg-blue-50">
+          <button className="border border-[#80CBC4] text-[#80CBC4] hover:bg-[#004D40] px-4 py-2 rounded">
             Export CSV
           </button>
-          <button className="px-4 py-2 bg-hover-sidebar text-white text-sm rounded">
+          <button className="px-4 py-2 bg-btn text-white text-sm rounded">
             Tambahkan Siswa
           </button>
         </div>
