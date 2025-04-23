@@ -63,7 +63,7 @@ export default function HalamanKegiatan() {
         </div>
 
         <div className="mt-6 flex justify-end">
-          <button className="px-4 py-2 bg-hover-sidebar text-white text-sm rounded ">
+          <button className="px-4 py-2 bg-btn text-white text-sm rounded ">
             Tambah Kegiatan
           </button>
         </div>

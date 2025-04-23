@@ -3,8 +3,8 @@ import { useState } from 'react';
 
 export default function HalamanGuru() {
   const [search, setSearch] = useState('');
-
-  const dataGuru = [
+  const [showModal, setShowModal] = useState(false);
+  const [dataGuru, setDataGuru] = useState([
     {
       nama: 'Selwin Saputra, S.Pd.,Gr',
       jabatan: 'Kepala Sekolah',
@@ -37,11 +37,61 @@ export default function HalamanGuru() {
       jenisKelamin: 'Netral',
       foto: 'https://ui-avatars.com/api/?name=Jumriana&background=0D8ABC&color=fff',
     },
-  ];
+  ]);
+
+  const [form, setForm] = useState({
+    email: '',
+    name: '',
+    jabatan: '',
+    nip: '',
+    tempatLahir: '',
+    tanggalLahir: '',
+    jenisKelamin: '',
+    foto: null,
+  });
 
   const filteredGuru = dataGuru.filter((guru) =>
     guru.nama.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleExportCSV = () => {
+    const header = ['Nama', 'Jabatan', 'NIP', 'Tempat Tanggal Lahir', 'Jenis Kelamin'];
+    const rows = filteredGuru.map(guru => [
+      guru.nama, guru.jabatan, guru.nip, guru.ttl, guru.jenisKelamin
+    ]);
+    const csvContent = [header, ...rows].map(e => e.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'data-guru.csv';
+    link.click();
+  };
+
+  const handleSubmit = () => {
+    const fotoURL = form.foto || `https://ui-avatars.com/api/?name=${form.nama.replace(/\s+/g, '+')}&background=0D8ABC&color=fff`;
+    setDataGuru([...dataGuru, { ...form, foto: fotoURL }]);
+    setForm({ nama: '', jabatan: '', nip: '', ttl: '', jenisKelamin: '', foto: '' });
+    setShowModal(false);
+  };
+
+  const handleImportCSV = () => {
+    // Buat buka file input atau redirect ke logic import CSV
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.csv';
+
+    fileInput.onchange = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        // Lanjutkan ke proses parsing
+        console.log('File CSV dipilih:', file);
+        // Di sini kamu bisa kirim file ke API atau parse di frontend
+      }
+    };
+
+    fileInput.click();
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 bg-gray-50">
@@ -99,14 +149,115 @@ export default function HalamanGuru() {
         </div>
 
         <div className="mt-4 flex justify-end gap-2">
-          <button className="px-4 py-2 border border-blue-500 text-blue-500 text-sm rounded hover:bg-blue-50">
+          <button
+            className="border border-[#80CBC4] text-[#80CBC4] hover:bg-[#004D40] px-4 py-2 rounded"
+            onClick={handleExportCSV}
+          >
             Export CSV
           </button>
-          <button className="px-4 py-2 bg-hover-sidebar text-white text-sm rounded">
+          <button
+            className="px-4 py-2 bg-btn text-white text-sm rounded"
+            onClick={() => setShowModal(true)}
+          >
             Tambahkan Guru
           </button>
         </div>
       </div>
-    </div>
-  );
+
+      {/* MODAL */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 px-4">
+          <div className="bg-white w-full max-w-4xl rounded-xl shadow-lg p-10">
+            <h1 className="text-2xl font-semibold text-gray-800 mb-6">Tambahkan Guru</h1>
+
+            <div className="mb-8">
+              <button
+                className="text-lg text-gray-700 hover:text-gray-900 border-b-2 border-gray-800 pb-1"
+                onClick={handleImportCSV}
+              >
+                Import CSV
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <input
+                type="email"
+                placeholder="Email"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+              <input
+                type="text"
+                placeholder="Nama"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+              <input
+                type="text"
+                placeholder="Jabatan"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                value={form.jabatan}
+                onChange={(e) => setForm({ ...form, jabatan: e.target.value })}
+              />
+              <input
+                type="text"
+                placeholder="NIP"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                value={form.nip}
+                onChange={(e) => setForm({ ...form, nip: e.target.value })}
+              />
+              <input
+                type="text"
+                placeholder="Tempat Lahir"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                value={form.tempatLahir}
+                onChange={(e) => setForm({ ...form, tempatLahir: e.target.value })}
+              />
+              <input
+                type="date"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                value={form.tanggalLahir}
+                onChange={(e) => setForm({ ...form, tanggalLahir: e.target.value })}
+              />
+              <select
+                className="border border-gray-300 rounded-md px-3 py-2 w-full text-gray-500"
+                value={form.jenisKelamin}
+                onChange={(e) => setForm({ ...form, jenisKelamin: e.target.value })}
+              >
+                <option value="">Jenis Kelamin</option>
+                <option value="Laki-laki">Laki-laki</option>
+                <option value="Perempuan">Perempuan</option>
+              </select>
+              <input
+                type="file"
+                accept="image/*"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                onChange={(e) => setForm({ ...form, foto: e.target.files[0] })}
+              />
+            </div> 
+              <div className="flex justify-end">
+                <button
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium text-sm px-6 py-2 rounded-md"
+                  onClick={handleSubmit}
+                >
+                  Add Teacher
+                </button>
+                <button
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium text-sm px-6 py-2 rounded-md"
+                onClick={() => setShowModal(false)}
+              >
+                Kembali
+              </button>
+              
+              </div>
+            </div>
+          </div>
+      )}
+
+
+
+        </div>
+      );
 }

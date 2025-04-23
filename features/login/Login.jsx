@@ -1,4 +1,33 @@
+'use client'
+import { useRouter } from 'next/navigation'
+
 export default function Home() {
+    const router = useRouter()
+
+    const handleSubmit = async(e) => {
+        e.preventDefault()
+        // Logika autentikasi bisa ditaruh di sini juga kalau ada
+        // const email = e.target.email.value
+        // const password = e.target.password.value
+      
+        // const res = await fetch('/api/login', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({ email, password })
+        // })
+      
+        // const data = await res.json()
+      
+        // if (res.ok) {
+        //   console.log('Berhasil login:', data)
+        //   // redirect ke dashboard
+        //   window.location.href = '/dashboard'
+        // } else {
+        //   alert(data.error)
+        // }
+        router.push('/dashboard') // Arahkan ke halaman dashboard
+    }
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
@@ -8,7 +37,7 @@ export default function Home() {
                     <p className="text-sm text-gray-500">Masuk ke dashboard TK AZIZAH 2</p>
                 </div>
 
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                             Email
@@ -35,7 +64,7 @@ export default function Home() {
 
                     <button
                         type="submit"
-                        className="w-full bg-[#0A1D56] hover:bg-blue-900 text-white font-medium py-2 px-4 rounded-lg transition duration-300"
+                        className="w-full bg-btn text-white font-medium py-2 px-4 rounded-lg transition duration-300"
                     >
                         Masuk
                     </button>
