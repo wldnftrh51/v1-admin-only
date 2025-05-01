@@ -19,7 +19,7 @@ export default function Sidebar() {
           width={80}
           height={80}
         />
-        <h1 className="text-sm font-bold mt-2 text-center">TK AZIZAH 2</h1>
+        <h1 className="text-lg font-bold mt-2 text-center">TK AZIZAH 2</h1>
       </div>
 
       {/* Menu Navigasi */}
@@ -38,7 +38,7 @@ export default function Sidebar() {
   `}
             >
               {item.icon}
-              <span className="text-sm">{item.title}</span>
+              <span className="text-lg">{item.title}</span>
             </Link>
 
           );
