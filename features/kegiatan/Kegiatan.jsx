@@ -1,8 +1,8 @@
 'use client'
-import React from 'react';
+import React, { useState } from 'react';
 
 export default function HalamanKegiatan() {
-  const dataKegiatan = [
+  const [dataKegiatan, setDataKegiatan] = useState([
     {
       judul: 'Kegiatan 1',
       tanggal: '2025/03/01',
@@ -10,24 +10,38 @@ export default function HalamanKegiatan() {
       foto: 'lorem.jpg',
     },
     {
-      judul: 'Kegiatan 2',
+      judul: 'Kegiatan 1',
       tanggal: '2025/03/01',
       deskripsi: 'Lorem ipsum dolor sit amet consectetur...',
       foto: 'lorem.jpg',
     },
     {
-      judul: 'Kegiatan 3',
+      judul: 'Kegiatan 1',
       tanggal: '2025/03/01',
       deskripsi: 'Lorem ipsum dolor sit amet consectetur...',
       foto: 'lorem.jpg',
     },
     {
-      judul: 'Kegiatan 4',
+      judul: 'Kegiatan 1',
       tanggal: '2025/03/01',
       deskripsi: 'Lorem ipsum dolor sit amet consectetur...',
       foto: 'lorem.jpg',
     },
-  ];
+  ]);
+
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({
+    judul: '',
+    tanggal: '',
+    deskripsi: '',
+    foto: '',
+  });
+
+  const handleSubmit = () => {
+    setDataKegiatan([...dataKegiatan, form]);
+    setForm({ judul: '', tanggal: '', deskripsi: '', foto: '' });
+    setShowModal(false);
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 bg-gray-50">
@@ -38,22 +52,22 @@ export default function HalamanKegiatan() {
         </div>
 
         <div className="overflow-x-auto rounded-md bg-white shadow mt-15">
-          <table className="min-w-full text-sm text-left">
+          <table className="w-full text-lg text-left">
             <thead className="bg-[#F3F6FD] text-gray-700">
               <tr>
-                <th className="px-4 py-3">Judul</th>
-                <th className="px-4 py-3">Tanggal</th>
-                <th className="px-4 py-3">Deskripsi</th>
-                <th className="px-4 py-3">Foto</th>
+                <th className="px-6 py-4">Judul</th>
+                <th className="px-6 py-4">Tanggal</th>
+                <th className="px-6 py-4">Deskripsi</th>
+                <th className="px-6 py-4">Foto</th>
               </tr>
             </thead>
             <tbody>
               {dataKegiatan.map((kegiatan, i) => (
                 <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-[#F9FBFF]'}>
-                  <td className="px-4 py-4">{kegiatan.judul}</td>
-                  <td className="px-4 py-4">{kegiatan.tanggal}</td>
-                  <td className="px-4 py-4">{kegiatan.deskripsi}</td>
-                  <td className="px-4 py-4 text-blue-600 underline cursor-pointer">
+                  <td className="px-6 py-4">{kegiatan.judul}</td>
+                  <td className="px-6 py-4">{kegiatan.tanggal}</td>
+                  <td className="px-6 py-4">{kegiatan.deskripsi}</td>
+                  <td className="px-6 py-4 text-blue-600 underline cursor-pointer">
                     {kegiatan.foto}
                   </td>
                 </tr>
@@ -63,11 +77,68 @@ export default function HalamanKegiatan() {
         </div>
 
         <div className="mt-6 flex justify-end">
-          <button className="px-4 py-2 bg-btn text-white text-sm rounded ">
+          <button
+            className="px-4 py-2 bg-btn text-white text-lg rounded"
+            onClick={() => setShowModal(true)}
+          >
             Tambah Kegiatan
           </button>
         </div>
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white w-full max-w-3xl rounded-xl shadow-lg p-10">
+            <h1 className="text-2xl font-semibold text-gray-800 mb-6">Tambah Kegiatan</h1>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <input
+                type="text"
+                placeholder="Judul"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                value={form.judul}
+                onChange={(e) => setForm({ ...form, judul: e.target.value })}
+              />
+              <input
+                type="date"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                value={form.tanggal}
+                onChange={(e) => setForm({ ...form, tanggal: e.target.value })}
+              />
+              <input
+                type="text"
+                placeholder="Deskripsi"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                value={form.deskripsi}
+                onChange={(e) => setForm({ ...form, deskripsi: e.target.value })}
+              />
+              <input
+                type="text"
+                placeholder="Nama File Foto (opsional)"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                value={form.foto}
+                onChange={(e) => setForm({ ...form, foto: e.target.value })}
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium text-lg px-6 py-2 rounded-md mr-4"
+                onClick={handleSubmit}
+              >
+                Tambah
+              </button>
+              <button
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium text-lg px-6 py-2 rounded-md"
+                onClick={() => setShowModal(false)}
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
