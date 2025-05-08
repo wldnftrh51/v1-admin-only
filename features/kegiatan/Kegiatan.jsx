@@ -88,8 +88,8 @@ export default function HalamanKegiatan() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white w-full max-w-3xl rounded-xl shadow-lg p-10">
+        <div className="absolute inset-0 flex items-center justify-center z-30">
+          <div className="bg-white w-full max-w-4xl rounded-xl shadow-xl border border-gray-200 p-10">
             <h1 className="text-2xl font-semibold text-gray-800 mb-6">Tambah Kegiatan</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">

@@ -71,57 +71,57 @@ export default function HalamanSiswa() {
   //   saveAs(blob, "data-siswa.xlsx");
   // };
   const handleExportExcel = async () => {
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("Siswa");
-      worksheet.addRow(["nama", "nisn", "alamat", "kelas", "jenisKelamin"]);
-  
-      dataSiswa.forEach((siswa) => {
-        worksheet.addRow([
-          siswa.nama,
-          siswa.nisn,
-          siswa.alamat,
-          siswa.kelas,
-          siswa.jenisKelamin,
-        ]);
-      });
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-  
-      saveAs(blob, "data-siswa.xlsx");
-    };
-  
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Siswa");
+    worksheet.addRow(["nama", "nisn", "alamat", "kelas", "jenisKelamin"]);
+
+    dataSiswa.forEach((siswa) => {
+      worksheet.addRow([
+        siswa.nama,
+        siswa.nisn,
+        siswa.alamat,
+        siswa.kelas,
+        siswa.jenisKelamin,
+      ]);
+    });
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    saveAs(blob, "data-siswa.xlsx");
+  };
+
   const handleImportExcel = () => {
-      const fileInput = document.createElement("input");
-      fileInput.type = "file";
-      fileInput.accept = ".xlsx, .xls";
-  
-      fileInput.onchange = async (event) => {
-        const file = event.target.files[0];
-        if (file) {
-          const workbook = new ExcelJS.Workbook();
-          const arrayBuffer = await file.arrayBuffer();
-          await workbook.xlsx.load(arrayBuffer);
-  
-          const worksheet = workbook.getWorksheet("Siswa") || workbook.worksheets[0];
-          const importedData = [];
-  
-          worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber === 1) return; // skip header
-            const [nama, nisn, alamat, kelas, jenisKelamin] = row.values.slice(1);
-            importedData.push({ nama, nisn, alamat, kelas, jenisKelamin });
-          });
-  
-          setDataSiswa((prev) => [...prev, ...importedData]);
-        }
-      };
-  
-      fileInput.click();
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".xlsx, .xls";
+
+    fileInput.onchange = async (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const workbook = new ExcelJS.Workbook();
+        const arrayBuffer = await file.arrayBuffer();
+        await workbook.xlsx.load(arrayBuffer);
+
+        const worksheet =
+          workbook.getWorksheet("Siswa") || workbook.worksheets[0];
+        const importedData = [];
+
+        worksheet.eachRow((row, rowNumber) => {
+          if (rowNumber === 1) return; // skip header
+          const [nama, nisn, alamat, kelas, jenisKelamin] = row.values.slice(1);
+          importedData.push({ nama, nisn, alamat, kelas, jenisKelamin });
+        });
+
+        setDataSiswa((prev) => [...prev, ...importedData]);
+      }
     };
 
+    fileInput.click();
+  };
 
-    const filteredSiswa = dataSiswa
+  const filteredSiswa = dataSiswa
     .filter((siswa) =>
       (siswa.nama + siswa.nisn).toLowerCase().includes(search.toLowerCase())
     )
@@ -132,7 +132,6 @@ export default function HalamanSiswa() {
         return b[sortBy]?.localeCompare(a[sortBy] || "");
       }
     });
-
 
   const [form, setForm] = useState({
     name: "",
@@ -259,31 +258,22 @@ export default function HalamanSiswa() {
 
       {/* MODAL */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white w-full max-w-4xl rounded-xl shadow-lg p-10">
+        <div className="absolute inset-0 flex items-center justify-center z-30">
+          <div className="bg-white w-full max-w-4xl rounded-xl shadow-xl border border-gray-200 p-10">
             <h1 className="text-2xl font-semibold text-gray-800 mb-6">
               Tambahkan Siswa
             </h1>
 
             <div className="mb-8">
               <button
-                className="text-lg text-gray-700 hover:text-gray-900 border-b-2 border-gray-800 pb-1 flex items-center gap-2" // Flex untuk ikon dan teks berdampingan
+                className="text-lg text-gray-700 hover:text-gray-900 border-b-2 border-gray-800 pb-1 flex items-center gap-2"
                 onClick={handleImportExcel}
               >
-                <FaFileExcel className="text-xl" />{" "}
-                {/* Menambahkan ikon Excel */}
-                Import Excel
+                <FaFileExcel className="text-xl" /> Import Excel
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              {/* <input
-                type="email"
-                placeholder="Email"
-                className="border border-gray-300 rounded-md px-3 py-2 w-full"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              /> */}
               <input
                 type="text"
                 placeholder="Nama"
@@ -324,6 +314,7 @@ export default function HalamanSiswa() {
                 <option value="Perempuan">Perempuan</option>
               </select>
             </div>
+
             <div className="flex justify-end">
               <button
                 className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium text-lg px-6 py-2 rounded-md mr-4"
