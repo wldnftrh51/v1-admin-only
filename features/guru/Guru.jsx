@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { FaFileExcel } from "react-icons/fa";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 
 export default function HalamanGuru() {
@@ -26,7 +26,7 @@ export default function HalamanGuru() {
       jenisKelamin: "-",
       foto: "https://ui-avatars.com/api/?name=Ihwana&background=0D8ABC&color=fff",
     },
-    {
+    { 
       nama: "Yudisthira, S.Pd.I",
       jabatan: "Guru PAI",
       nip: "-",
@@ -55,6 +55,29 @@ export default function HalamanGuru() {
     foto: null,
   });
 
+  const handleExportExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Guru");
+    worksheet.addRow(["Nama", "Jabatan", "NIP", "Tempat Tanggal Lahir", "Jenis Kelamin"]);
+
+    dataGuru.forEach((guru) => {
+      worksheet.addRow([
+        guru.nama,
+        guru.jabatan,
+        guru.nip,
+        guru.ttl,
+        guru.jenisKelamin,
+      ]);
+    });
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    saveAs(blob, "data-guru.xlsx");
+  };
+
+
   // const filteredGuru = dataGuru.filter((guru) =>
   //   guru.nama.toLowerCase().includes(search.toLowerCase())
   // );
@@ -73,31 +96,7 @@ export default function HalamanGuru() {
   //   link.click();
   // };
 
-  const handleExportExcel = () => {
-    const header = [
-      "Nama",
-      "Jabatan",
-      "NIP",
-      "Tempat Tanggal Lahir",
-      "Jenis Kelamin",
-    ];
-    const rows = filteredGuru.map((guru) => [
-      guru.nama,
-      guru.jabatan,
-      guru.nip,
-      guru.ttl,
-      guru.jenisKelamin,
-    ]);
-    const worksheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Guru");
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, "data-guru.xlsx");
-  };
+
 
   const handleSubmit = () => {
     setDataGuru([...dataGuru, { ...form }]);
@@ -135,15 +134,27 @@ export default function HalamanGuru() {
     fileInput.type = "file";
     fileInput.accept = ".xlsx, .xls";
 
-    fileInput.onchange = (event) => {
+    fileInput.onchange = async (event) => {
       const file = event.target.files[0];
       if (file) {
-        console.log("File Excel dipilih:", file);
-        // Process the file here, like parsing it or sending to an API
+        const workbook = new ExcelJS.Workbook();
+        const arrayBuffer = await file.arrayBuffer();
+        await workbook.xlsx.load(arrayBuffer);
+
+        const worksheet = workbook.getWorksheet("Guru") || workbook.worksheets[0];
+        const importedData = [];
+
+        worksheet.eachRow((row, rowNumber) => {
+          if (rowNumber === 1) return; // skip header
+          const [nama, jabatan, nip, ttl, jenisKelamin] = row.values.slice(1);
+          importedData.push({ nama, jabatan, nip, ttl, jenisKelamin });
+        });
+
+        setDataGuru((prev) => [...prev, ...importedData]);
       }
     };
 
-    fileInput.click(); // Trigger the file input
+    fileInput.click();
   };
 
   const sortedGuru = [...dataGuru].sort((a, b) => {

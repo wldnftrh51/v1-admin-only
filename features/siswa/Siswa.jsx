@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { FaFileExcel } from "react-icons/fa";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 
 export default function HalamanSiswa() {
@@ -70,67 +70,69 @@ export default function HalamanSiswa() {
   //   const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
   //   saveAs(blob, "data-siswa.xlsx");
   // };
-
-  const handleExportExcel = () => {
-    // Tentukan header yang mau diekspor secara eksplisit
-    const header = ["nama", "nisn", "alamat", "kelas", "jenisKelamin"];
-
-    // Mapping data siswa hanya berdasarkan header yang ditentukan
-    const rows = filteredSiswa.map((siswa) =>
-      header.map((key) => siswa[key] ?? "")
-    );
-
-    // Buat worksheet dan workbook
-    const worksheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "siswa");
-
-    // Ekspor ke file Excel
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-
-    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, "data-siswa.xlsx");
-  };
-
+  const handleExportExcel = async () => {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Siswa");
+      worksheet.addRow(["nama", "nisn", "alamat", "kelas", "jenisKelamin"]);
+  
+      dataSiswa.forEach((siswa) => {
+        worksheet.addRow([
+          siswa.nama,
+          siswa.nisn,
+          siswa.alamat,
+          siswa.kelas,
+          siswa.jenisKelamin,
+        ]);
+      });
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      saveAs(blob, "data-siswa.xlsx");
+    };
+  
   const handleImportExcel = () => {
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.accept = ".xlsx, .xls";
-
-    fileInput.onchange = (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        console.log("File Excel dipilih:", file);
-        // Process the file here, like parsing it or sending to an API
-      }
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = ".xlsx, .xls";
+  
+      fileInput.onchange = async (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          const workbook = new ExcelJS.Workbook();
+          const arrayBuffer = await file.arrayBuffer();
+          await workbook.xlsx.load(arrayBuffer);
+  
+          const worksheet = workbook.getWorksheet("Siswa") || workbook.worksheets[0];
+          const importedData = [];
+  
+          worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber === 1) return; // skip header
+            const [nama, nisn, alamat, kelas, jenisKelamin] = row.values.slice(1);
+            importedData.push({ nama, nisn, alamat, kelas, jenisKelamin });
+          });
+  
+          setDataSiswa((prev) => [...prev, ...importedData]);
+        }
+      };
+  
+      fileInput.click();
     };
 
-    fileInput.click(); // Trigger the file input
-  };
 
-  const sortedsiswa = [...dataSiswa].sort((a, b) => {
-    if (sortBy === "nama") {
-      return sortOrder === "asc"
-        ? a.nama.localeCompare(b.nama)
-        : b.nama.localeCompare(a.nama);
-    } else if (sortBy === "kelas") {
-      return sortOrder === "asc"
-        ? a.kelas.localeCompare(b.kelas)
-        : b.kelas.localeCompare(a.kelas);
-    }
-    return 0;
-  });
+    const filteredSiswa = dataSiswa
+    .filter((siswa) =>
+      (siswa.nama + siswa.nisn).toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sortOrder === "asc") {
+        return a[sortBy]?.localeCompare(b[sortBy] || "");
+      } else {
+        return b[sortBy]?.localeCompare(a[sortBy] || "");
+      }
+    });
 
-  const filteredSiswa = sortedsiswa.filter((item) => {
-    const lowerSearch = search.toLowerCase();
-    return (
-      item.nama.toLowerCase().includes(lowerSearch) ||
-      item.nisn.toLowerCase().includes(lowerSearch)
-    );
-  });
 
   const [form, setForm] = useState({
     name: "",
@@ -166,7 +168,7 @@ export default function HalamanSiswa() {
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
           <input
             type="text"
-            placeholder="Cari berdasarkan nama atau nisn"
+            placeholder="Cari berdasarkan nama "
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="px-4 py-2 text-lg border rounded-md w-full sm:w-100 shadow-sm bg-white"
