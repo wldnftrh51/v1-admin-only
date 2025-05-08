@@ -1,8 +1,8 @@
 import React from 'react';
 
 const dataPengguna = [
-    { nama: 'Johndoe', username: 'Doe', email: 'Johndoe@gmail.com', password: 'john_Doe1' },
-    { nama: 'doejohn', username: 'John', email: 'doejohn@gmail.com', password: 'doe_john1' },
+    { nama: 'Johndoe', username: 'Doe', email: 'Johndoe@gmail.com', password: '********' },
+    { nama: 'doejohn', username: 'John', email: 'doejohn@gmail.com', password: '********' },
 ];
 
 export default function HalamanDaftarPengguna() {
