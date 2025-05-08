@@ -1,5 +1,4 @@
 import db from '../db' // koneksi ke MySQL dari file lib/db.js
-import bcrypt from 'bcrypt' // kalau kamu hash password-nya
 import { NextResponse } from 'next/server'
 
 export async function POST(req) {
