@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-
+import Image from "next/image";
 export default function Home() {
     const router = useRouter()
 
@@ -32,7 +32,12 @@ export default function Home() {
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
                 <div className="flex flex-col items-center mb-6">
-                    <img src="/logo.png" alt="TK AZIZAH 2 Logo" className="h-16 mb-2" />
+                    <Image
+                             src="/images/logo.png"
+                             alt="Background"
+                             width={80}
+                             height={80}
+                           />
                     <h1 className="text-2xl font-semibold text-gray-800">Login Admin</h1>
                     <p className="text-sm text-gray-500">Masuk ke dashboard TK AZIZAH 2</p>
                 </div>
