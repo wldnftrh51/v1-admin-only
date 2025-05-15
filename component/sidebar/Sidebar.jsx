@@ -4,7 +4,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Navlink } from './navlink';
-import { Images } from 'lucide-react';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -14,7 +13,7 @@ export default function Sidebar() {
       {/* Logo dan Nama Sekolah */}
       <div className="flex flex-col items-center py-6 border-b border-white/20">
         <Image
-          src="/images/logo.png"
+          src="https://gwn-bucket.s3.us-east-1.amazonaws.com/images/logoo.png"
           alt="Background"
           width={80}
           height={80}

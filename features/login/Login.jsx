@@ -33,7 +33,7 @@ export default function Home() {
             <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
                 <div className="flex flex-col items-center mb-6">
                     <Image
-                             src="/images/logo.png"
+                             src="https://gwn-bucket.s3.us-east-1.amazonaws.com/images/logoo.png"
                              alt="Background"
                              width={80}
                              height={80}
