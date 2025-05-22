@@ -84,16 +84,13 @@ export default function HalamanTestimoni() {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 bg-gray-50">
-      <div className="flex-1 p-6 bg-[#F5F6FA] min-h-screen w-full">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">
+   <div className=" items-center justify-center min-h-screen w-full p-8 bg-gray-50">
+       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
             Halaman Testimoni
           </h1>
-          <button className="text-lg text-gray-600 hover:underline font-semibold">
-            Log out
-          </button>
         </div>
+
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
           <input
@@ -101,12 +98,12 @@ export default function HalamanTestimoni() {
             placeholder="Cari berdasarkan nama"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-4 py-2 text-lg border rounded-md w-full sm:w-80 shadow-sm bg-white"
+            className="px-4 py-2 text-sm md:text-lg border rounded-md w-full sm:w-80 shadow-sm bg-white"
           />
         </div>
 
         <div className="overflow-x-auto rounded-md bg-white shadow mt-10">
-          <table className="w-full table-fixed text-lg text-left">
+          <table className="w-full table-fixed text-sm md:text-lg text-left">
             <thead className="bg-[#F3F6FD] text-gray-700">
               <tr>
                 <th
@@ -166,7 +163,7 @@ export default function HalamanTestimoni() {
                   <td className="px-6 py-4 min-w-[130px]">
                     <button
                       onClick={() => toggleTampilkan(item.id_testimoni)}
-                      className="flex items-center gap-1 text-lg font-medium px-3 py-1 rounded-md hover:bg-gray-100 transition"
+                      className="flex items-center gap-1 text-sm md:text-lg font-medium px-3 py-1 rounded-md hover:bg-gray-100 transition"
                     >
                       {item.tampilkan ? (
                         <>
@@ -200,6 +197,5 @@ export default function HalamanTestimoni() {
           </table>
         </div>
       </div>
-    </div>
   );
 }

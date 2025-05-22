@@ -78,26 +78,6 @@ export default function HalamanGuru() {
   };
 
 
-  // const filteredGuru = dataGuru.filter((guru) =>
-  //   guru.nama.toLowerCase().includes(search.toLowerCase())
-  // );
-
-  // const handleExportExcel = () => {
-  //   const header = ['Nama', 'Jabatan', 'NIP', 'Tempat Tanggal Lahir', 'Jenis Kelamin'];
-  //   const rows = filteredGuru.map(guru => [
-  //     guru.nama, guru.jabatan, guru.nip, guru.ttl, guru.jenisKelamin
-  //   ]);
-  //   const ExcelContent = [header, ...rows].map(e => e.join(',')).join('\n');
-  //   const blob = new Blob([ExcelContent], { type: 'text/Excel;charset=utf-8;' });
-  //   const url = URL.createObjectURL(blob);
-  //   const link = document.createElement('a');
-  //   link.href = url;
-  //   link.download = 'data-guru.Excel';
-  //   link.click();
-  // };
-
-
-
   const handleSubmit = () => {
     setDataGuru([...dataGuru, { ...form }]);
     setForm({
@@ -110,24 +90,6 @@ export default function HalamanGuru() {
     });
     setShowModal(false);
   };
-
-  // const handleImportExcel = () => {
-  //   // Buat buka file input atau redirect ke logic import Excel
-  //   const fileInput = document.createElement("input");
-  //   fileInput.type = "file";
-  //   fileInput.accept = ".Excel";
-
-  //   fileInput.onchange = (event) => {
-  //     const file = event.target.files[0];
-  //     if (file) {
-  //       // Lanjutkan ke proses parsing
-  //       console.log("File Excel dipilih:", file);
-  //       // Di sini kamu bisa kirim file ke API atau parse di frontend
-  //     }
-  //   };
-
-  //   fileInput.click();
-  // };
 
   const handleImportExcel = () => {
     const fileInput = document.createElement("input");
@@ -179,14 +141,13 @@ export default function HalamanGuru() {
   });
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 bg-gray-50">
-      <div className="flex-1 p-6 bg-[#F5F6FA] min-h-screen w-full relative">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Halaman Guru</h1>
-          <button className="text-lg text-gray-600 hover:underline font-semibold">
-            Log out
-          </button>
+    <div className=" items-center justify-center min-h-screen w-full p-8 bg-gray-50">
+       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
+            Halaman Guru
+          </h1>
         </div>
+      
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
           <input
@@ -194,12 +155,12 @@ export default function HalamanGuru() {
             placeholder="Cari berdasarkan nama atau jabatan"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-4 py-2 text-lg border rounded-md w-full sm:w-100 shadow-sm bg-white"
+            className="px-4 py-2 text-sm md:text-lg border rounded-md w-full sm:w-100 shadow-sm bg-white"
           />
         </div>
 
         <div className="overflow-x-auto rounded-md bg-white shadow mt-10 w-full">
-          <table className="w-full text-lg text-left">
+          <table className="min-w-full text-sm md:text-lg text-left">
             <thead className="bg-[#F3F6FD] text-gray-700">
               <tr>
                 <th
@@ -266,12 +227,6 @@ export default function HalamanGuru() {
         </div>
 
         <div className="mt-4 flex justify-end gap-2">
-          {/* <button
-            className="border border-[#80CBC4] text-[#80CBC4] hover:bg-[#004D40] px-4 py-2 rounded"
-            onClick={handleExportExcel}
-          >
-            Export Excel
-          </button> */}
           <button
             className="text-green-600 text-2xl hover:text-green-800"
             onClick={handleExportExcel}
@@ -286,7 +241,6 @@ export default function HalamanGuru() {
             Tambahkan Guru
           </button>
         </div>
-      </div>
 
       {/* MODAL */}
       {showModal && (
@@ -373,13 +327,13 @@ export default function HalamanGuru() {
             </div>
             <div className="flex justify-end">
               <button
-                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium text-lg px-6 py-2 rounded-md mr-4"
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium text-sm md:text-lg px-6 py-2 rounded-md mr-4"
                 onClick={handleSubmit}
               >
                 Add Teacher
               </button>
               <button
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium text-lg px-6 py-2 rounded-md"
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium text-sm md:text-lg px-6 py-2 rounded-md"
                 onClick={() => setShowModal(false)}
               >
                 Kembali

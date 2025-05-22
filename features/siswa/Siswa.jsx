@@ -45,31 +45,6 @@ export default function HalamanSiswa() {
     },
   ];
 
-  // const handleExportExcel = () => {
-  //   // Ambil header dari kolom-kolom data (mengambil nama properti dari objek data pertama)
-  //   // const header = Object.keys(filteredSiswa[0] || {}).map((key) => key);
-  //   const header = ["nama", "nisn", "alamat", "kelas", "jenisKelamin"];
-
-  //   // Buat data rows berdasarkan data yang ada di filteredSiswa
-  //   const rows = filteredSiswa.map(
-  //     (siswa) => header.map((key) => siswa[key]) // Menyesuaikan data dengan header yang diambil
-  //   );
-
-  //   // Buat worksheet
-  //   const worksheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
-
-  //   // Buat workbook dan masukkan worksheet
-  //   const workbook = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(workbook, worksheet, "siswa");
-
-  //   // Ekspor ke Excel
-  //   const excelBuffer = XLSX.write(workbook, {
-  //     bookType: "xlsx",
-  //     type: "array",
-  //   });
-  //   const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-  //   saveAs(blob, "data-siswa.xlsx");
-  // };
   const handleExportExcel = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Siswa");
@@ -155,13 +130,11 @@ export default function HalamanSiswa() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 bg-gray-50">
-      <div className="flex-1 p-6 bg-[#F5F6FA] min-h-screen w-full">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Halaman Siswa</h1>
-          <button className="text-lg text-gray-600 hover:underline font-semibold">
-            Log out
-          </button>
+    <div className=" items-center justify-center min-h-screen w-full p-8 bg-gray-50">
+       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
+            Halaman Siswa
+          </h1>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
@@ -170,12 +143,12 @@ export default function HalamanSiswa() {
             placeholder="Cari berdasarkan nama "
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-4 py-2 text-lg border rounded-md w-full sm:w-100 shadow-sm bg-white"
+            className="px-4 py-2 text-sm md:text-lg border rounded-md w-full sm:w-100 shadow-sm bg-white"
           />
         </div>
 
         <div className="overflow-x-auto rounded-md bg-white shadow mt-10">
-          <table className="min-w-full text-lg text-left">
+          <table className="min-w-full text-sm md:text-lg text-left">
             <thead className="bg-[#F3F6FD] text-gray-700">
               <tr>
                 <th
@@ -254,7 +227,6 @@ export default function HalamanSiswa() {
             Tambahkan Siswa
           </button>
         </div>
-      </div>
 
       {/* MODAL */}
       {showModal && (
@@ -317,13 +289,13 @@ export default function HalamanSiswa() {
 
             <div className="flex justify-end">
               <button
-                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium text-lg px-6 py-2 rounded-md mr-4"
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium text-sm md:text-lg px-6 py-2 rounded-md mr-4"
                 onClick={handleSubmit}
               >
                 Add Student
               </button>
               <button
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium text-lg px-6 py-2 rounded-md"
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium text-sm md: px-6 py-2 rounded-md"
                 onClick={() => setShowModal(false)}
               >
                 Kembali
