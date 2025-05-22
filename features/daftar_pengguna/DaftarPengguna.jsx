@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trash2} from "lucide-react";
 
 const dataPengguna = [
     { nama: 'Johndoe', username: 'Doe', email: 'Johndoe@gmail.com', password: '********' },
@@ -34,6 +35,14 @@ export default function HalamanDaftarPengguna() {
                                 <td className="px-6 py-4">{item.username}</td>
                                 <td className="px-6 py-4">{item.email}</td>
                                 <td className="px-6 py-4 underline cursor-pointer">{item.password}</td>
+                                <td className="px-4 py-3">
+                                    <button
+                                        onClick={() => deleteTestimoni(item)}
+                                        className="text-red-600 hover:text-red-800"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
