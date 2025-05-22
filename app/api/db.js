@@ -10,3 +10,5 @@ const db = await mysql.createPool({
 
 // Mengekspor koneksi database agar bisa digunakan di file lain
 export default db
+
+

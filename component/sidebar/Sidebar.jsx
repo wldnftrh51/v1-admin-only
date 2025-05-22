@@ -6,14 +6,24 @@ import { usePathname } from 'next/navigation';
 import { Navlink } from './navlink';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   const toggleSidebar = () => setIsOpen(!isOpen);
   const closeSidebar = () => setIsOpen(false);
+
+  const handleLogout = () => {
+    // Contoh hapus token/session
+    localStorage.removeItem('token'); // sesuaikan dengan cara penyimpanan kamu
+
+    // Redirect ke halaman login
+    router.push('/');
+  };
 
   return (
     <>
@@ -76,6 +86,32 @@ export default function Sidebar() {
               </Link>
             );
           })}
+           {/* Tombol Logout */}
+          <button
+            onClick={() => {
+              closeSidebar();
+              handleLogout();
+            }}
+            className="flex items-center gap-3 px-4 py-4 mt-4 w-full rounded-md hover:bg-[#26A69A] transition-colors duration-200 text-[#E0F2F1]"
+            type="button"
+          >
+            {/* Icon logout, bisa pakai icon lucide-react UserLogout misalnya */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"
+              />
+            </svg>
+            <span className="text-sm md:text-lg">Logout</span>
+          </button>
         </nav>
       </aside>
 
