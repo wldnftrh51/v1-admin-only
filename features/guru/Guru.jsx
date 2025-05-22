@@ -3,6 +3,8 @@ import { useState } from "react";
 import { FaFileExcel } from "react-icons/fa";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { Trash2 } from "lucide-react";
+
 
 export default function HalamanGuru() {
   const [search, setSearch] = useState("");
@@ -26,7 +28,7 @@ export default function HalamanGuru() {
       jenisKelamin: "-",
       foto: "https://ui-avatars.com/api/?name=Ihwana&background=0D8ABC&color=fff",
     },
-    { 
+    {
       nama: "Yudisthira, S.Pd.I",
       jabatan: "Guru PAI",
       nip: "-",
@@ -142,105 +144,113 @@ export default function HalamanGuru() {
 
   return (
     <div className=" items-center justify-center min-h-screen w-full p-8 bg-gray-50">
-       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
-            Halaman Guru
-          </h1>
-        </div>
-      
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
+          Halaman Guru
+        </h1>
+      </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
-          <input
-            type="text"
-            placeholder="Cari berdasarkan nama atau jabatan"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="px-4 py-2 text-sm md:text-lg border rounded-md w-full sm:w-100 shadow-sm bg-white"
-          />
-        </div>
 
-        <div className="overflow-x-auto rounded-md bg-white shadow mt-10 w-full">
-          <table className="min-w-full text-sm md:text-lg text-left">
-            <thead className="bg-[#F3F6FD] text-gray-700">
-              <tr>
-                <th
-                  className="px-6 py-4 cursor-pointer"
-                  onClick={() => {
-                    if (sortBy === "nama") {
-                      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-                    } else {
-                      setSortBy("nama");
-                      setSortOrder("asc");
-                    }
-                  }}
-                >
-                  Nama{" "}
-                  {sortBy === "nama" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
-                </th>
-                <th
-                  className="px-6 py-4 cursor-pointer"
-                  onClick={() => {
-                    if (sortBy === "jabatan") {
-                      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-                    } else {
-                      setSortBy("jabatan");
-                      setSortOrder("asc");
-                    }
-                  }}
-                >
-                  Jabatan{" "}
-                  {sortBy === "jabatan"
-                    ? sortOrder === "asc"
-                      ? "↑"
-                      : "↓"
-                    : ""}
-                </th>
-                <th className="px-6 py-4">NIP</th>
-                <th className="px-6 py-4">Tempat, Tanggal Lahir</th>
-                <th className="px-6 py-4">Jenis Kelamin</th>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
+        <input
+          type="text"
+          placeholder="Cari berdasarkan nama atau jabatan"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="px-4 py-2 text-sm md:text-lg border rounded-md w-full sm:w-100 shadow-sm bg-white"
+        />
+      </div>
+
+      <div className="overflow-x-auto rounded-md bg-white shadow mt-10 w-full">
+        <table className="min-w-full text-sm md:text-lg text-left">
+          <thead className="bg-[#F3F6FD] text-gray-700">
+            <tr>
+              <th
+                className="px-6 py-4 cursor-pointer"
+                onClick={() => {
+                  if (sortBy === "nama") {
+                    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                  } else {
+                    setSortBy("nama");
+                    setSortOrder("asc");
+                  }
+                }}
+              >
+                Nama{" "}
+                {sortBy === "nama" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+              </th>
+              <th
+                className="px-6 py-4 cursor-pointer"
+                onClick={() => {
+                  if (sortBy === "jabatan") {
+                    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                  } else {
+                    setSortBy("jabatan");
+                    setSortOrder("asc");
+                  }
+                }}
+              >
+                Jabatan{" "}
+                {sortBy === "jabatan"
+                  ? sortOrder === "asc"
+                    ? "↑"
+                    : "↓"
+                  : ""}
+              </th>
+              <th className="px-6 py-4">NIP</th>
+              <th className="px-6 py-4">Tempat, Tanggal Lahir</th>
+              <th className="px-6 py-4">Jenis Kelamin</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredGuru.map((guru, i) => (
+              <tr
+                key={i}
+                className={i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"}
+              >
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={guru.foto}
+                      alt={guru.nama}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <span>{guru.nama}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4">{guru.jabatan}</td>
+                <td className="px-6 py-4">{guru.nip}</td>
+                <td className="px-6 py-4">{guru.ttl}</td>
+                <td className="px-6 py-4">{guru.jenisKelamin}</td>
+                <td className="px-4 py-3">
+                  <button
+                    onClick={() => deleteTestimoni(guru)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredGuru.map((guru, i) => (
-                <tr
-                  key={i}
-                  className={i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"}
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={guru.foto}
-                        alt={guru.nama}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      <span>{guru.nama}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">{guru.jabatan}</td>
-                  <td className="px-6 py-4">{guru.nip}</td>
-                  <td className="px-6 py-4">{guru.ttl}</td>
-                  <td className="px-6 py-4">{guru.jenisKelamin}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            className="text-green-600 text-2xl hover:text-green-800"
-            onClick={handleExportExcel}
-            title="Ekspor ke Excel"
-          >
-            <FaFileExcel />
-          </button>
-          <button
-            className="px-4 py-2 bg-btn text-white text-lg rounded"
-            onClick={() => setShowModal(true)}
-          >
-            Tambahkan Guru
-          </button>
-        </div>
+      <div className="mt-4 flex justify-end gap-2">
+        <button
+          className="text-green-600 text-2xl hover:text-green-800"
+          onClick={handleExportExcel}
+          title="Ekspor ke Excel"
+        >
+          <FaFileExcel />
+        </button>
+        <button
+          className="px-4 py-2 bg-btn text-white text-lg rounded"
+          onClick={() => setShowModal(true)}
+        >
+          Tambahkan Guru
+        </button>
+      </div>
 
       {/* MODAL */}
       {showModal && (

@@ -1,5 +1,7 @@
 'use client'
 import React, { useState } from 'react';
+import { Trash2 } from "lucide-react";
+
 
 export default function HalamanKegiatan() {
   const [dataKegiatan, setDataKegiatan] = useState([
@@ -68,6 +70,14 @@ export default function HalamanKegiatan() {
                   <td className="px-6 py-4">{kegiatan.deskripsi}</td>
                   <td className="px-6 py-4 text-blue-600 underline cursor-pointer">
                     {kegiatan.foto}
+                  </td>
+                   <td className="px-4 py-3">
+                    <button
+                      onClick={() => deleteTestimoni(kegiatan)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </td>
                 </tr>
               ))}

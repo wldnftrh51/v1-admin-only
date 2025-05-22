@@ -3,6 +3,8 @@ import { useState } from "react";
 import { FaFileExcel } from "react-icons/fa";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { Trash2} from "lucide-react";
+
 
 export default function HalamanSiswa() {
   const [search, setSearch] = useState("");
@@ -206,6 +208,14 @@ export default function HalamanSiswa() {
                   <td className="px-6 py-4">{siswa.alamat}</td>
                   <td className="px-6 py-4">{siswa.kelas}</td>
                   <td className="px-6 py-4">{siswa.jenisKelamin}</td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => deleteTestimoni(siswa)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
