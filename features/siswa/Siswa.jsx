@@ -2,7 +2,7 @@
 import { FaFileExcel } from "react-icons/fa";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { Trash2 } from "lucide-react";
+import { Trash2, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function HalamanSiswa() {
@@ -15,6 +15,14 @@ export default function HalamanSiswa() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("nama_lengkap");
   const [sortOrder, setSortOrder] = useState("asc");
+
+  // State untuk notification popup
+  const [notification, setNotification] = useState({
+    show: false,
+    type: "", // 'success', 'error', 'warning'
+    title: "",
+    message: "",
+  });
 
   const [form, setForm] = useState({
     nama_lengkap: "",
@@ -34,6 +42,26 @@ export default function HalamanSiswa() {
     foto: null, // file foto untuk upload
   });
 
+  // Function untuk menampilkan notifikasi
+  const showNotification = (type, title, message) => {
+    setNotification({
+      show: true,
+      type,
+      title,
+      message,
+    });
+
+    // Auto hide setelah 3 detik
+    setTimeout(() => {
+      setNotification((prev) => ({ ...prev, show: false }));
+    }, 3000);
+  };
+
+  // Function untuk menutup notifikasi
+  const closeNotification = () => {
+    setNotification((prev) => ({ ...prev, show: false }));
+  };
+
   useEffect(() => {
     fetchSiswaData();
   }, []);
@@ -47,15 +75,15 @@ export default function HalamanSiswa() {
       setDataSiswa(data);
     } catch (error) {
       console.error(error);
+      showNotification("error", "Error", "Gagal memuat data siswa");
     } finally {
       setLoading(false);
     }
   };
-  
 
   const handleSubmit = async () => {
     if (!form.nama_lengkap || !form.nisn) {
-      alert("Mohon isi nama lengkap dan NISN!");
+      showNotification("warning", "Peringatan", "Mohon isi nama lengkap dan NISN!");
       return;
     }
 
@@ -80,7 +108,7 @@ export default function HalamanSiswa() {
         const uploadResult = await uploadRes.json();
         fotoURL = uploadResult.url;
       } catch (err) {
-        alert("Gagal mengunggah foto: " + err.message);
+        showNotification("error", "Error Upload", "Gagal mengunggah foto: " + err.message);
         setLoading(false);
         return;
       }
@@ -118,9 +146,9 @@ export default function HalamanSiswa() {
 
       setShowModal(false);
       resetForm();
-      alert("Siswa berhasil ditambahkan!");
+      showNotification("success", "Berhasil", "Siswa berhasil ditambahkan!");
     } catch (error) {
-      alert("Gagal menambahkan siswa");
+      showNotification("error", "Error", "Gagal menambahkan siswa");
       console.error(error);
     } finally {
       setLoading(false);
@@ -161,10 +189,10 @@ export default function HalamanSiswa() {
       });
       if (!res.ok) throw new Error("Gagal menghapus siswa");
 
-      alert("Siswa berhasil dihapus");
+      showNotification("success", "Berhasil", "Siswa berhasil dihapus!");
       fetchSiswaData();
     } catch (error) {
-      alert(error.message || "Terjadi kesalahan saat menghapus siswa");
+      showNotification("error", "Error", error.message || "Terjadi kesalahan saat menghapus siswa");
     } finally {
       setShowDeleteModal(false);
       setSiswaToDelete(null);
@@ -190,54 +218,120 @@ export default function HalamanSiswa() {
     });
 
   const handleExportExcel = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Siswa");
-    worksheet.addRow([
-      "Nama Lengkap",
-      "NISN",
-      "Alamat",
-      "Kelas",
-      "Jenis Kelamin",
-      "Nama Panggilan",
-      "Tempat Lahir",
-      "Tanggal Lahir",
-      "Anak Ke",
-      "Jumlah Saudara",
-      "Agama",
-      "Status Dalam Keluarga",
-      "Kewarganegaraan",
-      "URL Foto",
-    ]);
-
-    filteredSiswa.forEach((siswa) => {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Siswa");
       worksheet.addRow([
-        siswa.nama_lengkap,
-        siswa.nisn,
-        siswa.alamat,
-        siswa.kelas,
-        siswa.jenis_kelamin,
-        siswa.nama_panggilan,
-        siswa.tempat_lahir,
-        siswa.tanggal_lahir,
-        siswa.anak_ke,
-        siswa.jumlah_saudara,
-        siswa.agama,
-        siswa.status_dalam_keluarga,
-        siswa.kewarganegaraan,
-        siswa.file_path,
+        "Nama Lengkap",
+        "NISN",
+        "Alamat",
+        "Kelas",
+        "Jenis Kelamin",
+        "Nama Panggilan",
+        "Tempat Lahir",
+        "Tanggal Lahir",
+        "Anak Ke",
+        "Jumlah Saudara",
+        "Agama",
+        "Status Dalam Keluarga",
+        "Kewarganegaraan",
+        "URL Foto",
       ]);
-    });
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
+      filteredSiswa.forEach((siswa) => {
+        worksheet.addRow([
+          siswa.nama_lengkap,
+          siswa.nisn,
+          siswa.alamat,
+          siswa.kelas,
+          siswa.jenis_kelamin,
+          siswa.nama_panggilan,
+          siswa.tempat_lahir,
+          siswa.tanggal_lahir,
+          siswa.anak_ke,
+          siswa.jumlah_saudara,
+          siswa.agama,
+          siswa.status_dalam_keluarga,
+          siswa.kewarganegaraan,
+          siswa.file_path,
+        ]);
+      });
 
-    saveAs(blob, "data-siswa.xlsx");
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      saveAs(blob, "data-siswa.xlsx");
+      showNotification("success", "Berhasil", "Data siswa berhasil diekspor ke Excel!");
+    } catch (error) {
+      showNotification("error", "Error", "Gagal mengekspor data ke Excel");
+      console.error(error);
+    }
+  };
+
+  // Notification Component
+  const NotificationPopup = () => {
+    if (!notification.show) return null;
+
+    const getIcon = () => {
+      switch (notification.type) {
+        case "success":
+          return <CheckCircle className="w-6 h-6 text-green-500" />;
+        case "error":
+          return <XCircle className="w-6 h-6 text-red-500" />;
+        case "warning":
+          return <AlertCircle className="w-6 h-6 text-yellow-500" />;
+        default:
+          return <AlertCircle className="w-6 h-6 text-blue-500" />;
+      }
+    };
+
+    const getBgColor = () => {
+      switch (notification.type) {
+        case "success":
+          return "bg-green-50 border-green-200";
+        case "error":
+          return "bg-red-50 border-red-200";
+        case "warning":
+          return "bg-yellow-50 border-yellow-200";
+        default:
+          return "bg-blue-50 border-blue-200";
+      }
+    };
+
+    return (
+      <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-right-2">
+        <div
+          className={`${getBgColor()} border rounded-lg shadow-lg p-4 max-w-sm`}
+        >
+          <div className="flex items-start gap-3">
+            {getIcon()}
+            <div className="flex-1">
+              <h4 className="font-medium text-gray-900">
+                {notification.title}
+              </h4>
+              <p className="text-sm text-gray-600 mt-1">
+                {notification.message}
+              </p>
+            </div>
+            <button
+              onClick={closeNotification}
+              className="text-gray-400 hover:text-gray-600 ml-2"
+            >
+              <XCircle className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className=" items-center justify-center min-h-screen w-full p-8 bg-gray-50">
+      {/* Notification Popup */}
+      <NotificationPopup />
+
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
           Halaman Siswa
@@ -639,35 +733,38 @@ export default function HalamanSiswa() {
       )}
 
       {showDeleteModal && siswaToDelete && (
-  <div className="fixed inset-0 bg-black/30 z-40 flex items-center justify-center px-4">
-    <div className="bg-white rounded-lg p-6 shadow-xl max-w-md w-full border border-gray-300">
-      <h2 className="text-xl font-semibold mb-4 text-center text-red-600">
-        Konfirmasi Hapus
-      </h2>
-      <p className="text-center mb-6">
-        Apakah Anda yakin ingin menghapus siswa{" "}
-        <span className="font-semibold">{siswaToDelete.nama_lengkap}</span>?
-      </p>
-      <div className="flex justify-center gap-4">
-        <button
-          onClick={() => {
-            setShowDeleteModal(false);
-            setSiswaToDelete(null);
-          }}
-          className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded"
-        >
-          Batal
-        </button>
-        <button
-          onClick={deleteSiswa}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
-        >
-          Hapus
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+        <div className="fixed inset-0 bg-black/30 z-40 flex items-center justify-center px-4">
+          <div className="bg-white rounded-lg p-6 shadow-xl max-w-md w-full border border-gray-300">
+            <h2 className="text-xl font-semibold mb-4 text-center text-red-600">
+              Konfirmasi Hapus
+            </h2>
+            <p className="text-center mb-6">
+              Apakah Anda yakin ingin menghapus siswa{" "}
+              <span className="font-semibold">
+                {siswaToDelete.nama_lengkap}
+              </span>
+              ?
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSiswaToDelete(null);
+                }}
+                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded"
+              >
+                Batal
+              </button>
+              <button
+                onClick={deleteSiswa}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

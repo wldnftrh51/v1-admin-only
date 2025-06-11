@@ -15,6 +15,6 @@ import {
     { title: 'Kegiatan', href: '/kegiatan', icon: <CalendarCheck2 size={20} /> },
     { title: 'Testimoni', href: '/testimoni', icon: <MessageSquareText size={20} /> },
     { title: 'Pendaftar', href: '/pendaftar', icon: <ClipboardList size={20} /> },
-    { title: 'DaftarPengguna', href: '/pengguna', icon: <User2 size={20} /> },
+    { title: 'Pengguna', href: '/pengguna', icon: <User2 size={20} /> },
   ];
   
