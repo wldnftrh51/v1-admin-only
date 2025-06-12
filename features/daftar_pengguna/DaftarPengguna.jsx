@@ -9,7 +9,7 @@ export default function HalamanDaftarPengguna() {
   const [submitLoading, setSubmitLoading] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   // Enhanced notification state
   const [notification, setNotification] = useState({
     show: false,
@@ -19,10 +19,10 @@ export default function HalamanDaftarPengguna() {
   });
 
   // Enhanced delete confirmation state
-  const [confirmDelete, setConfirmDelete] = useState({ 
-    show: false, 
+  const [confirmDelete, setConfirmDelete] = useState({
+    show: false,
     pengguna: null,
-    loading: false 
+    loading: false
   });
 
   const [form, setForm] = useState({
@@ -87,27 +87,27 @@ export default function HalamanDaftarPengguna() {
   // Enhanced delete function
   const deleteUser = async () => {
     const { pengguna } = confirmDelete;
-    
+
     setConfirmDelete(prev => ({ ...prev, loading: true }));
-    
+
     try {
       const res = await fetch(`/api/daftar_pengguna?id=${pengguna.id_pengguna}`, {
         method: "DELETE",
       });
-      
+
       const result = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(result.error || "Gagal menghapus pengguna");
       }
-      
+
       // Update local data
       const updatedData = dataPengguna.filter(
         (item) => item.id_pengguna !== pengguna.id_pengguna
       );
       setDataPengguna(updatedData);
       showNotification('success', 'Berhasil Dihapus', `Pengguna ${pengguna.nama} telah dihapus`);
-      
+
     } catch (err) {
       showNotification('error', 'Gagal Menghapus', err.message);
     } finally {
@@ -122,20 +122,20 @@ export default function HalamanDaftarPengguna() {
 
   async function handleSubmit() {
     setSubmitLoading(true);
-    
+
     try {
       const res = await fetch("/api/daftar_pengguna", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      
+
       const result = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(result.error || "Gagal menambah pengguna");
       }
-      
+
       showNotification('success', 'Berhasil Ditambahkan', `Pengguna ${form.nama} berhasil ditambahkan`);
       setForm({ nama: "", username: "", email: "", password: "" });
       setIsModalOpen(false);
@@ -225,7 +225,7 @@ export default function HalamanDaftarPengguna() {
         <div className="text-center">
           <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <p className="text-red-600 mb-4 text-lg font-medium">Error: {error}</p>
-          <button 
+          <button
             onClick={fetchDataPengguna}
             className="bg-green-800 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
           >
@@ -237,7 +237,7 @@ export default function HalamanDaftarPengguna() {
   }
 
   return (
-    <div className="items-center justify-center min-h-screen w-full p-8 bg-gray-50">
+    <div className="flex flex-col justify-between min-h-screen w-full p-2 md:p-8 pb-0 bg-gray-50">
       {/* Enhanced Notification Popup */}
       <NotificationPopup />
 
@@ -259,7 +259,7 @@ export default function HalamanDaftarPengguna() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
                 <p className="text-gray-700">
                   Apakah Anda yakin ingin menghapus pengguna{' '}
@@ -271,7 +271,7 @@ export default function HalamanDaftarPengguna() {
                   Data pengguna akan dihapus secara permanen dari sistem.
                 </p>
               </div>
-              
+
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={cancelDelete}
@@ -337,7 +337,7 @@ export default function HalamanDaftarPengguna() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Username
@@ -352,7 +352,7 @@ export default function HalamanDaftarPengguna() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email
@@ -367,7 +367,7 @@ export default function HalamanDaftarPengguna() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Password
@@ -383,7 +383,7 @@ export default function HalamanDaftarPengguna() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                 />
               </div>
-              
+
               <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-gray-200">
                 <button
                   type="button"
@@ -427,7 +427,7 @@ export default function HalamanDaftarPengguna() {
         </div>
       )}
 
-      <div className="flex-1 p-6 w-full">
+      <div className="flex flex-col flex-grow p-6 w-full">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
             Halaman Daftar Pengguna
@@ -450,9 +450,8 @@ export default function HalamanDaftarPengguna() {
                 dataPengguna.map((item, index) => (
                   <tr
                     key={item.id_pengguna || index}
-                    className={`hover:bg-blue-50 transition-colors ${
-                      index % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
-                    }`}
+                    className={`hover:bg-blue-50 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
+                      }`}
                   >
                     <td className="px-6 py-4 text-gray-800 font-medium">{item.nama}</td>
                     <td className="px-6 py-4 text-gray-600">{item.username}</td>
@@ -487,8 +486,8 @@ export default function HalamanDaftarPengguna() {
             </tbody>
           </table>
         </div>
-
-        <div className="flex justify-end mt-6">
+      </div>
+        <div className="flex justify-end mt-8">
           <button
             onClick={() => setIsModalOpen(true)}
             className="bg-btn text-white font-semibold py-3 px-6 rounded-lg shadow-lg text-sm md:text-lg transition-colors flex items-center gap-2"
@@ -497,7 +496,6 @@ export default function HalamanDaftarPengguna() {
             Tambah Pengguna
           </button>
         </div>
-      </div>
     </div>
   );
 }
