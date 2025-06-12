@@ -2,7 +2,23 @@
 import { FaFileExcel, FaEdit } from "react-icons/fa";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { Trash2, CheckCircle, XCircle, AlertCircle, X, Eye, User, MapPin, Calendar, Users, Heart, Flag, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Trash2,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  X,
+  Eye,
+  User,
+  MapPin,
+  Calendar,
+  Users,
+  Heart,
+  Flag,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function HalamanSiswa() {
@@ -70,7 +86,7 @@ export default function HalamanSiswa() {
       weekday: "long",
       year: "numeric",
       month: "long",
-      day: "numeric"
+      day: "numeric",
     });
   };
 
@@ -151,7 +167,11 @@ export default function HalamanSiswa() {
 
   const handleSubmit = async () => {
     if (!form.nama_lengkap || !form.nisn) {
-      showNotification("warning", "Peringatan", "Mohon isi nama lengkap dan NISN!");
+      showNotification(
+        "warning",
+        "Peringatan",
+        "Mohon isi nama lengkap dan NISN!"
+      );
       return;
     }
 
@@ -164,7 +184,7 @@ export default function HalamanSiswa() {
         const formData = new FormData();
         formData.append("file", form.foto);
 
-        const uploadRes = await fetch("/api/siswa/upload", {
+        const uploadRes = await fetch("/api/siswa", {
           method: "POST",
           body: formData,
         });
@@ -176,7 +196,11 @@ export default function HalamanSiswa() {
         const uploadResult = await uploadRes.json();
         fotoURL = uploadResult.url;
       } catch (err) {
-        showNotification("error", "Error Upload", "Gagal mengunggah foto: " + err.message);
+        showNotification(
+          "error",
+          "Error Upload",
+          "Gagal mengunggah foto: " + err.message
+        );
         setLoading(false);
         return;
       }
@@ -202,7 +226,7 @@ export default function HalamanSiswa() {
 
     try {
       let res;
-      
+
       if (editMode && editingSiswa) {
         // Update siswa
         res = await fetch(`/api/siswa?id=${editingSiswa.id_siswa}`, {
@@ -220,7 +244,11 @@ export default function HalamanSiswa() {
           )
         );
 
-        showNotification("success", "Berhasil", "Data siswa berhasil diperbarui!");
+        showNotification(
+          "success",
+          "Berhasil",
+          "Data siswa berhasil diperbarui!"
+        );
       } else {
         // Tambah siswa baru
         res = await fetch("/api/siswa", {
@@ -241,7 +269,11 @@ export default function HalamanSiswa() {
       resetForm();
     } catch (error) {
       const action = editMode ? "memperbarui" : "menambahkan";
-      showNotification("error", "Error", `Gagal ${action} siswa: ${error.message}`);
+      showNotification(
+        "error",
+        "Error",
+        `Gagal ${action} siswa: ${error.message}`
+      );
       console.error(error);
     } finally {
       setLoading(false);
@@ -275,20 +307,35 @@ export default function HalamanSiswa() {
     setShowDeleteModal(true);
   };
 
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
   const deleteSiswa = async () => {
     if (!siswaToDelete) return;
+
+    setLoadingDelete(true); // Mulai loading
 
     try {
       const res = await fetch(`/api/siswa?id=${siswaToDelete.id_siswa}`, {
         method: "DELETE",
       });
+
       if (!res.ok) throw new Error("Gagal menghapus siswa");
 
-      setDataSiswa((prev) => prev.filter(siswa => siswa.id_siswa !== siswaToDelete.id_siswa));
+      // Update UI
+      setDataSiswa((prev) =>
+        prev.filter((siswa) => siswa.id_siswa !== siswaToDelete.id_siswa)
+      );
+
       showNotification("success", "Berhasil", "Siswa berhasil dihapus!");
     } catch (error) {
-      showNotification("error", "Error", error.message || "Terjadi kesalahan saat menghapus siswa");
+      showNotification(
+        "error",
+        "Error",
+        error.message || "Terjadi kesalahan saat menghapus siswa"
+      );
+      console.error("Delete error:", error);
     } finally {
+      setLoadingDelete(false); // Selesai loading
       setShowDeleteModal(false);
       setSiswaToDelete(null);
     }
@@ -378,7 +425,11 @@ export default function HalamanSiswa() {
       });
 
       saveAs(blob, "data-siswa.xlsx");
-      showNotification("success", "Berhasil", "Data siswa berhasil diekspor ke Excel!");
+      showNotification(
+        "success",
+        "Berhasil",
+        "Data siswa berhasil diekspor ke Excel!"
+      );
     } catch (error) {
       showNotification("error", "Error", "Gagal mengekspor data ke Excel");
       console.error(error);
@@ -392,13 +443,19 @@ export default function HalamanSiswa() {
     const getIcon = () => {
       switch (notification.type) {
         case "success":
-          return <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />;
+          return (
+            <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />
+          );
         case "error":
           return <XCircle className="w-6 h-6 text-red-500 flex-shrink-0" />;
         case "warning":
-          return <AlertCircle className="w-6 h-6 text-yellow-500 flex-shrink-0" />;
+          return (
+            <AlertCircle className="w-6 h-6 text-yellow-500 flex-shrink-0" />
+          );
         default:
-          return <AlertCircle className="w-6 h-6 text-blue-500 flex-shrink-0" />;
+          return (
+            <AlertCircle className="w-6 h-6 text-blue-500 flex-shrink-0" />
+          );
       }
     };
 
@@ -444,139 +501,147 @@ export default function HalamanSiswa() {
   };
 
   return (
-    <div className="items-center justify-center min-h-screen w-full p-8 bg-gray-50">
+    <div className="flex flex-col min-h-screen w-full p-8 bg-gray-50">
       {/* Notification Popup */}
       <NotificationPopup />
+      <div className="flex-grow">
+        <div className="flex flex-col pl-6 pt-6 sm:flex-row justify-between items-center mb-6 gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
+            Halaman Siswa
+          </h1>
+        </div>
 
-      <div className="flex flex-col pl-6 pt-6 sm:flex-row justify-between items-center mb-6 gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
-          Halaman Siswa
-        </h1>
-      </div>
+        <div className="flex flex-col pl-6 sm:flex-row sm:items-center gap-2 mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Cari berdasarkan nama "
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 pr-4 py-2 text-sm md:text-lg border border-gray-300 rounded-lg w-full sm:w-80 shadow-sm bg-white focus:ring-2"
+            />
+          </div>
+        </div>
 
-      <div className="flex flex-col pl-6 sm:flex-row sm:items-center gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="Cari berdasarkan nama atau NISN..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 text-sm md:text-lg border border-gray-300 rounded-md w-full sm:w-80 shadow-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-
-      <div className="overflow-x-auto ml-6 rounded-md bg-white shadow mt-10">
-        <table className="min-w-full text-sm md:text-lg text-left">
-          <thead className="bg-[#F3F6FD] text-gray-700">
-            <tr>
-              <th
-                className="px-6 py-4 cursor-pointer hover:bg-blue-50 transition-colors"
-                onClick={() => {
-                  if (sortBy === "nama_lengkap") {
-                    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-                  } else {
-                    setSortBy("nama_lengkap");
-                    setSortOrder("asc");
-                  }
-                }}
-              >
-                Nama{" "}
-                {sortBy === "nama_lengkap"
-                  ? sortOrder === "asc"
-                    ? "↑"
-                    : "↓"
-                  : ""}
-              </th>
-              <th className="px-6 py-4">Foto</th>
-              <th className="px-6 py-4">NISN</th>
-              <th className="px-6 py-4">Alamat</th>
-              <th
-                className="px-6 py-4 cursor-pointer hover:bg-blue-50 transition-colors"
-                onClick={() => {
-                  if (sortBy === "kelas") {
-                    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-                  } else {
-                    setSortBy("kelas");
-                    setSortOrder("asc");
-                  }
-                }}
-              >
-                Kelas{" "}
-                {sortBy === "kelas" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
-              </th>
-              <th className="px-6 py-4">Jenis Kelamin</th>
-              <th className="px-6 py-4 text-center">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedSiswa.length === 0 ? (
+        <div className="overflow-x-auto ml-6 rounded-md bg-white shadow mt-10">
+          <table className="min-w-full text-sm md:text-lg text-left">
+            <thead className="bg-[#F3F6FD] text-gray-700">
               <tr>
-                <td colSpan={7} className="text-center py-8 text-gray-500">
-                  {search ? "Tidak ada data yang cocok dengan pencarian." : "Belum ada data siswa."}
-                </td>
-              </tr>
-            ) : (
-              paginatedSiswa.map((siswa, i) => (
-                <tr
-                  key={siswa.id_siswa || i}
-                  className={`${i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"} hover:bg-blue-50 transition-colors`}
-                  onClick={() => handleShowDetail(siswa)}
-                  title="Klik untuk melihat detail lengkap"
+                <th
+                  className="px-6 py-4 cursor-pointer hover:bg-blue-50 transition-colors"
+                  onClick={() => {
+                    if (sortBy === "nama_lengkap") {
+                      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                    } else {
+                      setSortBy("nama_lengkap");
+                      setSortOrder("asc");
+                    }
+                  }}
                 >
-                  <td className="px-6 py-4 font-medium cursor-pointer hover:underline">
-                    {siswa.nama_lengkap}
-                  </td>
-                  <td className="px-6 py-4">
-                    {siswa.file_path ? (
-                      <img
-                        src={siswa.file_path}
-                        alt={siswa.nama_lengkap}
-                        className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-200"
-                        onError={(e) => {
-                          e.currentTarget.src =
-                            "https://ui-avatars.com/api/?name=" +
-                            encodeURIComponent(siswa.nama_lengkap) +
-                            "&background=0D8ABC&color=fff";
-                        }}
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white font-medium">
-                        {siswa.nama_lengkap?.charAt(0)?.toUpperCase() || "?"}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">{siswa.nisn}</td>
-                  <td className="px-6 py-4">{siswa.alamat || "-"}</td>
-                  <td className="px-6 py-4">{siswa.kelas || "-"}</td>
-                  <td className="px-6 py-4">{siswa.jenis_kelamin || "-"}</td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex justify-center gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditSiswa(siswa);
-                        }}
-                        className="text-green-600 hover:text-green-800 transition-colors p-1 rounded hover:bg-green-100"
-                        title="Edit data"
-                      >
-                        <FaEdit size={16} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          confirmDeleteSiswa(siswa);
-                        }}
-                        className="text-red-600 hover:text-red-800 transition-colors p-1 rounded hover:bg-red-100"
-                        title="Hapus data"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
+                  Nama{" "}
+                  {sortBy === "nama_lengkap"
+                    ? sortOrder === "asc"
+                      ? "↑"
+                      : "↓"
+                    : ""}
+                </th>
+                <th className="px-6 py-4">Foto</th>
+                <th className="px-6 py-4">NISN</th>
+                <th className="px-6 py-4">Alamat</th>
+                <th
+                  className="px-6 py-4 cursor-pointer hover:bg-blue-50 transition-colors"
+                  onClick={() => {
+                    if (sortBy === "kelas") {
+                      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                    } else {
+                      setSortBy("kelas");
+                      setSortOrder("asc");
+                    }
+                  }}
+                >
+                  Kelas{" "}
+                  {sortBy === "kelas" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                </th>
+                <th className="px-6 py-4">Jenis Kelamin</th>
+                <th className="px-6 py-4 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedSiswa.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-8 text-gray-500">
+                    {search
+                      ? "Tidak ada data yang cocok dengan pencarian."
+                      : "Belum ada data siswa."}
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                paginatedSiswa.map((siswa, i) => (
+                  <tr
+                    key={siswa.id_siswa || i}
+                    className={`${
+                      i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
+                    } hover:bg-blue-50 transition-colors`}
+                    onClick={() => handleShowDetail(siswa)}
+                    title="Klik untuk melihat detail lengkap"
+                  >
+                    <td className="px-6 py-4 font-medium cursor-pointer hover:underline">
+                      {siswa.nama_lengkap}
+                    </td>
+                    <td className="px-6 py-4">
+                      {siswa.file_path ? (
+                        <img
+                          src={siswa.file_path}
+                          alt={siswa.nama_lengkap}
+                          className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-200"
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              "https://ui-avatars.com/api/?name=" +
+                              encodeURIComponent(siswa.nama_lengkap) +
+                              "&background=0D8ABC&color=fff";
+                          }}
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white font-medium">
+                          {siswa.nama_lengkap?.charAt(0)?.toUpperCase() || "?"}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">{siswa.nisn}</td>
+                    <td className="px-6 py-4">{siswa.alamat || "-"}</td>
+                    <td className="px-6 py-4">{siswa.kelas || "-"}</td>
+                    <td className="px-6 py-4">{siswa.jenis_kelamin || "-"}</td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditSiswa(siswa);
+                          }}
+                          className="text-green-600 hover:text-green-800 transition-colors p-1 rounded hover:bg-green-100"
+                          title="Edit data"
+                        >
+                          <FaEdit size={16} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            confirmDeleteSiswa(siswa);
+                          }}
+                          className="text-red-600 hover:text-red-800 transition-colors p-1 rounded hover:bg-red-100"
+                          title="Hapus data"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Pagination dan Tombol Aksi */}
@@ -603,10 +668,9 @@ export default function HalamanSiswa() {
             </button>
           </div>
         ) : (
-          <div className="text-sm text-gray-600">
-          </div>
+          <div className="text-sm text-gray-600"></div>
         )}
-        
+
         {/* Tombol Ekspor + Tambahkan Siswa di kanan */}
         <div className="flex items-center gap-2">
           <button
@@ -658,20 +722,28 @@ export default function HalamanSiswa() {
                   )}&background=0D8ABC&color=fff&size=150`;
                 }}
               />
-              <h4 className="text-xl font-semibold text-gray-800">{selectedSiswa.nama_lengkap}</h4>
+              <h4 className="text-xl font-semibold text-gray-800">
+                {selectedSiswa.nama_lengkap}
+              </h4>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h5 className="font-semibold text-gray-700 mb-2">Informasi Personal</h5>
+                <h5 className="font-semibold text-gray-700 mb-2">
+                  Informasi Personal
+                </h5>
                 <div className="space-y-3">
                   <div>
                     <span className="text-sm text-gray-500">Nama Lengkap:</span>
                     <p className="font-medium">{selectedSiswa.nama_lengkap}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">Nama Panggilan:</span>
-                    <p className="font-medium">{selectedSiswa.nama_panggilan}</p>
+                    <span className="text-sm text-gray-500">
+                      Nama Panggilan:
+                    </span>
+                    <p className="font-medium">
+                      {selectedSiswa.nama_panggilan}
+                    </p>
                   </div>
                   <div>
                     <span className="text-sm text-gray-500">Nisn:</span>
@@ -682,7 +754,9 @@ export default function HalamanSiswa() {
                     <p className="font-medium">{selectedSiswa.kelas}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">Jenis Kelamin:</span>
+                    <span className="text-sm text-gray-500">
+                      Jenis Kelamin:
+                    </span>
                     <p className="font-medium">{selectedSiswa.jenis_kelamin}</p>
                   </div>
                   <div>
@@ -693,31 +767,45 @@ export default function HalamanSiswa() {
               </div>
 
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h5 className="font-semibold text-gray-700 mb-2">Informasi Tambahan</h5>
+                <h5 className="font-semibold text-gray-700 mb-2">
+                  Informasi Tambahan
+                </h5>
                 <div className="space-y-3">
                   <div>
                     <span className="text-sm text-gray-500">Tempat Lahir:</span>
                     <p className="font-medium">{selectedSiswa.tempat_lahir}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">Tanggal Lahir:</span>
-                    <p className="font-medium">{formatTanggal(selectedSiswa.tanggal_lahir)}</p>
+                    <span className="text-sm text-gray-500">
+                      Tanggal Lahir:
+                    </span>
+                    <p className="font-medium">
+                      {formatTanggal(selectedSiswa.tanggal_lahir)}
+                    </p>
                   </div>
                   <div>
                     <span className="text-sm text-gray-500">Anak ke:</span>
                     <p className="font-medium">{selectedSiswa.anak_ke}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">Jumlah Saudara:</span>
-                    <p className="font-medium">{selectedSiswa.jumlah_saudara}</p>
+                    <span className="text-sm text-gray-500">
+                      Jumlah Saudara:
+                    </span>
+                    <p className="font-medium">
+                      {selectedSiswa.jumlah_saudara}
+                    </p>
                   </div>
                   <div>
                     <span className="text-sm text-gray-500">Agama:</span>
                     <p className="font-medium">{selectedSiswa.agama}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">Kewarganegaraan:</span>
-                    <p className="font-medium">{selectedSiswa.kewarganegaraan}</p>
+                    <span className="text-sm text-gray-500">
+                      Kewarganegaraan:
+                    </span>
+                    <p className="font-medium">
+                      {selectedSiswa.kewarganegaraan}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -729,7 +817,7 @@ export default function HalamanSiswa() {
                   setShowDetailModal(false);
                   handleEditSiswa(selectedSiswa);
                 }}
-                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                className="px-6 py-2 bg-btn text-white rounded-lg flex items-center gap-2"
               >
                 <FaEdit size={16} />
                 Edit Data
@@ -745,7 +833,6 @@ export default function HalamanSiswa() {
         </div>
       )}
 
-
       {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-30 flex justify-center items-center px-4 pl-64">
@@ -756,7 +843,9 @@ export default function HalamanSiswa() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-700">
               <label className="block">
-                <span className="text-sm font-medium mb-1 block">Nama Lengkap*</span>
+                <span className="text-sm font-medium mb-1 block">
+                  Nama Lengkap*
+                </span>
                 <input
                   type="text"
                   value={form.nama_lengkap}
@@ -806,7 +895,9 @@ export default function HalamanSiswa() {
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium mb-1 block">Jenis Kelamin</span>
+                <span className="text-sm font-medium mb-1 block">
+                  Jenis Kelamin
+                </span>
                 <select
                   value={form.jenis_kelamin}
                   onChange={(e) =>
@@ -821,7 +912,9 @@ export default function HalamanSiswa() {
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium mb-1 block">Nama Panggilan</span>
+                <span className="text-sm font-medium mb-1 block">
+                  Nama Panggilan
+                </span>
                 <input
                   type="text"
                   value={form.nama_panggilan}
@@ -833,7 +926,9 @@ export default function HalamanSiswa() {
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium mb-1 block">Tempat Lahir</span>
+                <span className="text-sm font-medium mb-1 block">
+                  Tempat Lahir
+                </span>
                 <input
                   type="text"
                   value={form.tempat_lahir}
@@ -845,7 +940,9 @@ export default function HalamanSiswa() {
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium mb-1 block">Tanggal Lahir</span>
+                <span className="text-sm font-medium mb-1 block">
+                  Tanggal Lahir
+                </span>
                 <input
                   type="date"
                   value={form.tanggal_lahir}
@@ -870,7 +967,9 @@ export default function HalamanSiswa() {
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium mb-1 block">Jumlah Saudara</span>
+                <span className="text-sm font-medium mb-1 block">
+                  Jumlah Saudara
+                </span>
                 <input
                   type="number"
                   min={0}
@@ -895,7 +994,9 @@ export default function HalamanSiswa() {
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium mb-1 block">Status Dalam Keluarga</span>
+                <span className="text-sm font-medium mb-1 block">
+                  Status Dalam Keluarga
+                </span>
                 <input
                   type="text"
                   value={form.status_dalam_keluarga}
@@ -910,7 +1011,9 @@ export default function HalamanSiswa() {
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium mb-1 block">Kewarganegaraan</span>
+                <span className="text-sm font-medium mb-1 block">
+                  Kewarganegaraan
+                </span>
                 <input
                   type="text"
                   value={form.kewarganegaraan}
@@ -983,7 +1086,9 @@ export default function HalamanSiswa() {
                           {form.foto ? form.foto.name : "URL Gambar"}
                         </span>
                         <span className="text-xs text-gray-500">
-                          {form.foto ? `${(form.foto.size / 1024).toFixed(1)} KB` : "Eksternal"}
+                          {form.foto
+                            ? `${(form.foto.size / 1024).toFixed(1)} KB`
+                            : "Eksternal"}
                         </span>
                       </div>
                       <button
@@ -1022,8 +1127,10 @@ export default function HalamanSiswa() {
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     {editMode ? "Memperbarui..." : "Menyimpan..."}
                   </div>
+                ) : editMode ? (
+                  "Perbarui"
                 ) : (
-                  editMode ? "Perbarui" : "Simpan"
+                  "Simpan"
                 )}
               </button>
             </div>
@@ -1033,55 +1140,69 @@ export default function HalamanSiswa() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && siswaToDelete && (
-        <div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center px-4">
-          <div className="bg-white rounded-lg p-6 shadow-xl max-w-md w-full border border-gray-300">
-            <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                <XCircle className="h-6 w-6 text-red-600" />
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="flex-shrink-0 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <XCircle className="w-6 h-6 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Konfirmasi Hapus Siswa
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Tindakan ini tidak dapat dibatalkan
+                  </p>
+                </div>
               </div>
-              <h2 className="text-xl font-semibold mb-2 text-gray-900">
-                Konfirmasi Hapus
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Apakah Anda yakin ingin menghapus data siswa{" "}
-                <span className="font-semibold text-gray-900">
-                  {siswaToDelete.nama_lengkap}
-                </span>
-                ? Data yang dihapus tidak dapat dikembalikan.
-              </p>
-            </div>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setSiswaToDelete(null);
-                }}
-                className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded transition-colors shadow-md"
-              >
-                Batal
-              </button>
-              <button
-                onClick={deleteSiswa}
-                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors shadow-md hover:shadow-lg"
-              >
-                Hapus
-              </button>
+
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <p className="text-gray-700">
+                  Apakah Anda yakin ingin menghapus data siswa{" "}
+                  <span className="font-semibold text-red-700">
+                    {siswaToDelete.nama_lengkap}
+                  </span>
+                  ?
+                </p>
+                <p className="text-sm text-gray-600 mt-2">
+                  Data siswa akan dihapus secara permanen dari sistem.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setSiswaToDelete(null);
+                  }}
+                  disabled={loadingDelete}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={deleteSiswa}
+                  disabled={loadingDelete}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+                >
+                  {loadingDelete ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Menghapus...
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-4 h-4" />
+                      Hapus
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* CSS untuk animasi progress bar */}
-      <style jsx>{`
-        @keyframes shrink {
-          from {
-            width: 100%;
-          }
-          to {
-            width: 0%;
-          }
-        }
-      `}</style>
     </div>
   );
 }

@@ -14,6 +14,7 @@ import {
   Eye,
   ChevronLeft,
   ChevronRight,
+  Search,
 } from "lucide-react";
 
 export default function HalamanGuru() {
@@ -293,8 +294,12 @@ export default function HalamanGuru() {
     setShowDeleteModal(true);
   };
 
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
   const deleteGuru = async () => {
     if (!guruToDelete) return;
+
+    setLoadingDelete(true); // Mulai loading sebelum aksi delete
 
     try {
       const res = await fetch(
@@ -303,12 +308,16 @@ export default function HalamanGuru() {
           method: "DELETE",
         }
       );
+
       if (!res.ok) throw new Error("Gagal menghapus guru");
 
+      // Notifikasi sukses
       showNotification("success", "Berhasil", "Guru berhasil dihapus");
+
+      // Refresh data guru
       fetchDataGuru();
 
-      // Adjust current page if needed after deletion
+      // Penyesuaian halaman jika data berubah
       const newTotalPages = Math.ceil((filteredGuru.length - 1) / itemsPerPage);
       if (currentPage > newTotalPages && newTotalPages > 0) {
         setCurrentPage(newTotalPages);
@@ -319,7 +328,9 @@ export default function HalamanGuru() {
         "Error",
         error.message || "Terjadi kesalahan saat menghapus guru"
       );
+      console.error("Delete Guru Error:", error);
     } finally {
+      setLoadingDelete(false); // Selesai loading
       setShowDeleteModal(false);
       setGuruToDelete(null);
     }
@@ -466,13 +477,16 @@ export default function HalamanGuru() {
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
-          <input
-            type="text"
-            placeholder="Cari berdasarkan nama atau jabatan"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="px-4 py-2 text-lg border border-gray-300 rounded-md w-full sm:w-100 shadow-sm bg-white"
-          />
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Cari berdasarkan nama "
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 pr-4 py-2 text-sm md:text-lg border border-gray-300 rounded-lg w-full sm:w-80 shadow-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            />
+          </div>
         </div>
 
         <div className="overflow-x-auto rounded-md bg-white shadow mt-10 w-full">
@@ -731,7 +745,7 @@ export default function HalamanGuru() {
                   setShowDetailModal(false);
                   handleEdit(selectedGuru);
                 }}
-                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                className="px-6 py-2 bg-btn text-white rounded-lg  flex items-center gap-2"
               >
                 <FaEdit size={16} />
                 Edit Data
@@ -875,7 +889,7 @@ export default function HalamanGuru() {
               </button>
               <button
                 onClick={handleSubmit}
-                className="px-6 py-2 bg-green-800 text-white rounded hover:bg-green-600 disabled:bg-green-400"
+                className="px-6 py-2 bg-btn text-white rounded  disabled:bg-green-400"
                 disabled={loading}
               >
                 {loading
@@ -891,30 +905,63 @@ export default function HalamanGuru() {
         </div>
       )}
 
-      {/* Modal Konfirmasi Hapus */}
       {showDeleteModal && (
-        <div className="fixed inset-0  bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-md p-6 max-w-sm w-full shadow-lg mx-4">
-            <h3 className="text-xl font-semibold mb-4 text-center text-red-600">
-              Konfirmasi Hapus
-            </h3>
-            <p className="mb-6 text-center">
-              Apakah Anda yakin ingin menghapus guru{" "}
-              <strong>{guruToDelete?.nama}</strong>?
-            </p>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-              >
-                Batal
-              </button>
-              <button
-                onClick={deleteGuru}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Hapus
-              </button>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="flex-shrink-0 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Konfirmasi Hapus Guru
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Tindakan ini tidak dapat dibatalkan
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <p className="text-gray-700">
+                  Apakah Anda yakin ingin menghapus data guru{" "}
+                  <span className="font-semibold text-red-700">
+                    {guruToDelete?.nama}
+                  </span>
+                  ?
+                </p>
+                <p className="text-sm text-gray-600 mt-2">
+                  Data guru akan dihapus secara permanen dari sistem.
+                </p>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={loadingDelete}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={deleteGuru}
+                  disabled={loadingDelete}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+                >
+                  {loadingDelete ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Menghapus...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={16} />
+                      Hapus
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

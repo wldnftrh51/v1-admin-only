@@ -1,7 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trash2, ChevronDown, CheckCircle2, XCircle, AlertTriangle, CheckCircle, Eye, EyeOff } from "lucide-react";
+import {
+  Trash2,
+  ChevronDown,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  CheckCircle,
+  Eye,
+  EyeOff,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+} from "lucide-react";
 
 export default function HalamanTestimoni() {
   const [search, setSearch] = useState("");
@@ -10,7 +22,11 @@ export default function HalamanTestimoni() {
   const [sortOrder, setSortOrder] = useState("asc");
   const [selectedTestimoni, setSelectedTestimoni] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  
+
+  // State untuk pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   // Enhanced notification state
   const [notification, setNotification] = useState({
     show: false,
@@ -20,11 +36,11 @@ export default function HalamanTestimoni() {
   });
 
   // Enhanced delete confirmation state
-  const [confirmDelete, setConfirmDelete] = useState({ 
-    show: false, 
-    id: null, 
-    nama: '',
-    loading: false 
+  const [confirmDelete, setConfirmDelete] = useState({
+    show: false,
+    id: null,
+    nama: "",
+    loading: false,
   });
 
   // Function untuk menampilkan notifikasi
@@ -57,19 +73,32 @@ export default function HalamanTestimoni() {
         }
         const data = await response.json();
         setTestimoniData(data);
-        showNotification('success', 'Berhasil', 'Data testimoni berhasil dimuat');
+        showNotification(
+          "success",
+          "Berhasil",
+          "Data testimoni berhasil dimuat"
+        );
       } catch (error) {
         console.error("There was a problem with the fetch operation:", error);
-        showNotification('error', 'Gagal Memuat', 'Terjadi kesalahan saat memuat data testimoni');
+        showNotification(
+          "error",
+          "Gagal Memuat",
+          "Terjadi kesalahan saat memuat data testimoni"
+        );
       }
     };
     fetchTestimoni();
   }, []);
 
+  // Reset ke halaman 1 ketika search berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
   // Toggle status tampilkan
   const toggleTampilkan = async (id_testimoni) => {
     const originalData = [...testimoniData];
-    
+
     try {
       // Optimistic update
       const updatedData = testimoniData.map((item) =>
@@ -88,7 +117,10 @@ export default function HalamanTestimoni() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id_testimoni, tampilkan: toggledItem.tampilkan }),
+        body: JSON.stringify({
+          id_testimoni,
+          tampilkan: toggledItem.tampilkan,
+        }),
       });
 
       if (!response.ok) {
@@ -96,13 +128,19 @@ export default function HalamanTestimoni() {
       }
 
       showNotification(
-        'success', 
-        'Status Diubah', 
-        `Testimoni ${toggledItem.tampilkan ? 'ditampilkan' : 'disembunyikan'} di halaman publik`
+        "success",
+        "Status Diubah",
+        `Testimoni ${
+          toggledItem.tampilkan ? "ditampilkan" : "disembunyikan"
+        } di halaman publik`
       );
     } catch (error) {
       console.error("Error updating status:", error);
-      showNotification('error', 'Gagal Mengubah Status', 'Terjadi kesalahan saat mengubah status tampilan');
+      showNotification(
+        "error",
+        "Gagal Mengubah Status",
+        "Terjadi kesalahan saat mengubah status tampilan"
+      );
       // Revert changes if API call fails
       setTestimoniData(originalData);
     }
@@ -116,9 +154,9 @@ export default function HalamanTestimoni() {
   // Enhanced delete function
   const deleteTestimoni = async () => {
     const { id, nama } = confirmDelete;
-    
-    setConfirmDelete(prev => ({ ...prev, loading: true }));
-    
+
+    setConfirmDelete((prev) => ({ ...prev, loading: true }));
+
     try {
       const response = await fetch("/api/testimoni", {
         method: "DELETE",
@@ -136,18 +174,34 @@ export default function HalamanTestimoni() {
         (item) => item.id_testimoni !== id
       );
       setTestimoniData(updatedData);
-      showNotification('success', 'Berhasil Dihapus', `Testimoni dari ${nama} telah dihapus`);
+      showNotification(
+        "success",
+        "Berhasil Dihapus",
+        `Testimoni dari ${nama} telah dihapus`
+      );
+
+      // Adjust current page if needed after deletion
+      const newTotalPages = Math.ceil(
+        (filteredTestimoni.length - 1) / itemsPerPage
+      );
+      if (currentPage > newTotalPages && newTotalPages > 0) {
+        setCurrentPage(newTotalPages);
+      }
     } catch (error) {
       console.error("Error deleting testimoni:", error);
-      showNotification('error', 'Gagal Menghapus', 'Terjadi kesalahan saat menghapus testimoni');
+      showNotification(
+        "error",
+        "Gagal Menghapus",
+        "Terjadi kesalahan saat menghapus testimoni"
+      );
     } finally {
-      setConfirmDelete({ show: false, id: null, nama: '', loading: false });
+      setConfirmDelete({ show: false, id: null, nama: "", loading: false });
     }
   };
 
   // Cancel delete
   const cancelDelete = () => {
-    setConfirmDelete({ show: false, id: null, nama: '', loading: false });
+    setConfirmDelete({ show: false, id: null, nama: "", loading: false });
   };
 
   // Show detail modal
@@ -162,6 +216,7 @@ export default function HalamanTestimoni() {
     setShowDetailModal(false);
   };
 
+  // Sorting dan filtering data
   const sortedTestimoni = [...testimoniData].sort((a, b) => {
     if (sortBy === "nama") {
       return sortOrder === "asc"
@@ -178,6 +233,29 @@ export default function HalamanTestimoni() {
   const filteredTestimoni = sortedTestimoni.filter((item) =>
     item.nama.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredTestimoni.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = filteredTestimoni.slice(startIndex, endIndex);
+
+  // Pagination navigation functions
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   // Enhanced Notification Component
   const NotificationPopup = () => {
@@ -241,7 +319,7 @@ export default function HalamanTestimoni() {
   };
 
   return (
-    <div className="items-center justify-center min-h-screen w-full p-8 bg-gray-50">
+    <div className="flex flex-col min-h-screen w-full p-8 pb-0 bg-gray-50">
       {/* Enhanced Notification Popup */}
       <NotificationPopup />
 
@@ -295,8 +373,8 @@ export default function HalamanTestimoni() {
                 onClick={() => toggleTampilkan(selectedTestimoni.id_testimoni)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                   selectedTestimoni.tampilkan
-                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    : 'bg-blue-100 text-green-700 hover:bg-blue-200'
+                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-blue-100 text-green-700 hover:bg-blue-200"
                 }`}
               >
                 {selectedTestimoni.tampilkan ? (
@@ -350,19 +428,20 @@ export default function HalamanTestimoni() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
                 <p className="text-gray-700">
-                  Apakah Anda yakin ingin menghapus testimoni dari{' '}
+                  Apakah Anda yakin ingin menghapus testimoni dari{" "}
                   <span className="font-semibold text-red-700">
                     {confirmDelete.nama}
-                  </span>?
+                  </span>
+                  ?
                 </p>
                 <p className="text-sm text-gray-600 mt-2">
                   Data testimoni akan dihapus secara permanen dari sistem.
                 </p>
               </div>
-              
+
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={cancelDelete}
@@ -393,150 +472,198 @@ export default function HalamanTestimoni() {
           </div>
         </div>
       )}
+      <div className="flex-grow">
+        <div className="flex flex-col p-6 sm:flex-row justify-between items-center gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
+            Halaman Testimoni
+          </h1>
+        </div>
 
-      <div className="flex flex-col p-6 sm:flex-row justify-between items-center gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
-          Halaman Testimoni
-        </h1>
-      </div>
+        <div className="flex flex-col sm:flex-row sm:items-center pl-6 gap-2 mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Cari berdasarkan nama "
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 pr-4 py-2 text-sm md:text-lg border border-gray-300 rounded-lg w-full sm:w-80 shadow-sm bg-white focus:ring-2"
+            />
+          </div>
+        </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center pl-6 gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="Cari berdasarkan nama..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 text-sm md:text-lg border border-gray-300 rounded-lg w-full sm:w-80 shadow-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-        />
-      </div>
-
-      <div className="overflow-x-auto ml-6 rounded-lg bg-white shadow-lg mt-6">
-        <table className="w-full table-auto text-sm md:text-lg text-left">
-          <thead className="bg-[#F3F6FD] text-gray-700">
-            <tr>
-              <th
-                className="px-6 py-4 cursor-pointer min-w-[120px] hover:bg-blue-50 transition-colors"
-                onClick={() => {
-                  if (sortBy === "nama") {
-                    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-                  } else {
-                    setSortBy("nama");
-                    setSortOrder("asc");
-                  }
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  Nama{" "}
-                  {sortBy === "nama" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
-                </div>
-              </th>
-              <th className="px-6 py-4 min-w-[120px]">No. Telp</th>
-              <th className="px-6 py-4 min-w-[200px]">Isi Pesan</th>
-              <th
-                className="px-6 py-4 cursor-pointer min-w-[120px] hover:bg-blue-50 transition-colors"
-                onClick={() => {
-                  if (sortBy === "tampilkan") {
-                    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-                  } else {
-                    setSortBy("tampilkan");
-                    setSortOrder("asc");
-                  }
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  Tampilkan{" "}
-                  {sortBy === "tampilkan"
-                    ? sortOrder === "asc"
-                      ? "↑"
-                      : "↓"
-                    : ""}
-                </div>
-              </th>
-              <th className="px-6 py-4 min-w-[80px]">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTestimoni.length === 0 ? (
+        <div className="overflow-x-auto ml-6 rounded-lg bg-white shadow-lg mt-6">
+          <table className="w-full table-auto text-sm md:text-lg text-left">
+            <thead className="bg-[#F3F6FD] text-gray-700">
               <tr>
-                <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
-                  <div className="flex flex-col items-center gap-2">
-                    <CheckCircle2 className="w-12 h-12 text-gray-300" />
-                    <p className="text-lg font-medium">
-                      {testimoniData.length === 0 ? 'Belum ada data testimoni' : 'Tidak ada data yang sesuai pencarian'}
-                    </p>
-                    <p className="text-sm">
-                      {testimoniData.length === 0 
-                        ? 'Testimoni dari pelanggan akan muncul di sini' 
-                        : 'Coba ubah kata kunci pencarian Anda'
-                      }
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              filteredTestimoni.map((item, index) => (
-                <tr
-                  key={item.id_testimoni}
-                  className={`hover:bg-blue-50 transition-colors ${
-                    index % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
-                  }`}
+                <th
+                  className="px-6 py-4 cursor-pointer min-w-[120px] hover:bg-blue-50 transition-colors"
+                  onClick={() => {
+                    if (sortBy === "nama") {
+                      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                    } else {
+                      setSortBy("nama");
+                      setSortOrder("asc");
+                    }
+                  }}
                 >
-                  <td 
-                    className="px-6 py-4 text-gray-800 break-words font-medium hover:text-green-600 cursor-pointer"
-                    onClick={() => handleShowDetail(item)}
+                  <div className="flex items-center gap-2">
+                    Nama{" "}
+                    {sortBy === "nama" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                  </div>
+                </th>
+                <th className="px-6 py-4 min-w-[120px]">No. Telp</th>
+                <th className="px-6 py-4 min-w-[200px]">Isi Pesan</th>
+                <th
+                  className="px-6 py-4 cursor-pointer min-w-[120px] hover:bg-blue-50 transition-colors"
+                  onClick={() => {
+                    if (sortBy === "tampilkan") {
+                      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                    } else {
+                      setSortBy("tampilkan");
+                      setSortOrder("asc");
+                    }
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    Tampilkan{" "}
+                    {sortBy === "tampilkan"
+                      ? sortOrder === "asc"
+                        ? "↑"
+                        : "↓"
+                      : ""}
+                  </div>
+                </th>
+                <th className="px-6 py-4 min-w-[80px]">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentData.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="px-6 py-12 text-center text-gray-500"
                   >
-                    {item.nama}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {item.no_telpon}
-                  </td>
-                  <td 
-                    className="px-6 py-4 text-gray-700 break-words cursor-pointer hover:text-green-600"
-                    onClick={() => handleShowDetail(item)}
-                  >
-                    <div className="max-w-xs overflow-hidden">
-                      {item.isi_pesan.length > 80
-                        ? item.isi_pesan.substring(0, 80) + "..."
-                        : item.isi_pesan}
+                    <div className="flex flex-col items-center gap-2">
+                      <CheckCircle2 className="w-12 h-12 text-gray-300" />
+                      <p className="text-lg font-medium">
+                        {testimoniData.length === 0
+                          ? "Belum ada data testimoni"
+                          : "Tidak ada data yang sesuai pencarian"}
+                      </p>
+                      <p className="text-sm">
+                        {testimoniData.length === 0
+                          ? "Testimoni dari pelanggan akan muncul di sini"
+                          : "Coba ubah kata kunci pencarian Anda"}
+                      </p>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => toggleTampilkan(item.id_testimoni)}
-                      className="flex items-center gap-2 text-sm md:text-base font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                      {item.tampilkan ? (
-                        <>
-                          <CheckCircle2 className="text-green-600" size={18} />
-                          <span className="text-green-700 inline-block w-[70px]">
-                            YA
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <XCircle className="text-red-600" size={18} />
-                          <span className="text-red-700 inline-block w-[70px]">
-                            TIDAK
-                          </span>
-                        </>
-                      )}
-                      <ChevronDown className="text-gray-500 ml-1" size={14} />
-                    </button>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => showDeleteConfirmation(item.id_testimoni, item.nama)}
-                      className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
-                      title="Hapus testimoni"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                currentData.map((item, index) => (
+                  <tr
+                    key={item.id_testimoni}
+                    className={`hover:bg-blue-50 transition-colors ${
+                      index % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
+                    }`}
+                  >
+                    <td
+                      className="px-6 py-4 text-gray-800 break-words font-medium hover:text-green-600 cursor-pointer"
+                      onClick={() => handleShowDetail(item)}
+                    >
+                      {item.nama}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {item.no_telpon}
+                    </td>
+                    <td
+                      className="px-6 py-4 text-gray-700 break-words cursor-pointer hover:text-green-600"
+                      onClick={() => handleShowDetail(item)}
+                    >
+                      <div className="max-w-xs overflow-hidden">
+                        {item.isi_pesan.length > 80
+                          ? item.isi_pesan.substring(0, 80) + "..."
+                          : item.isi_pesan}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => toggleTampilkan(item.id_testimoni)}
+                        className="flex items-center gap-2 text-sm md:text-base font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        {item.tampilkan ? (
+                          <>
+                            <CheckCircle2
+                              className="text-green-600"
+                              size={18}
+                            />
+                            <span className="text-green-700 inline-block w-[70px]">
+                              YA
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="text-red-600" size={18} />
+                            <span className="text-red-700 inline-block w-[70px]">
+                              TIDAK
+                            </span>
+                          </>
+                        )}
+                        <ChevronDown className="text-gray-500 ml-1" size={14} />
+                      </button>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() =>
+                          showDeleteConfirmation(item.id_testimoni, item.nama)
+                        }
+                        className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                        title="Hapus testimoni"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Pagination dan Info */}
+      <div className="pb-2 flex justify-between items-center w-full px-6">
+        {/* Pagination di kiri */}
+        {totalPages > 1 ? (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={goToPrevPage}
+              disabled={currentPage === 1}
+              className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            <span className="px-3 py-2 border rounded-md font-medium">
+              {currentPage}
+            </span>
+
+            <button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        ) : (
+          <div />
+        )}
+
+        {/* Info pagination di kanan */}
+        <div className="flex items-center gap-4 text-sm text-gray-600">
+          {filteredTestimoni.length > 0 && <></>}
+        </div>
       </div>
     </div>
   );
