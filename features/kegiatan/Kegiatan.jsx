@@ -26,7 +26,7 @@ export default function HalamanKegiatan() {
   const [sortOrder, setSortOrder] = useState("desc");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Jumlah item per halaman
+  const itemsPerPage = 4; // Jumlah item per halaman
 
   // Enhanced notification state
   const [notification, setNotification] = useState({
@@ -667,16 +667,16 @@ export default function HalamanKegiatan() {
                       }`}
                   >
                     <td
-                      className="px-6 py-4 text-gray-800 break-words font-medium hover:text-green-600 cursor-pointer"
+                      className="px-6  text-gray-800 break-words font-medium hover:text-green-600 cursor-pointer"
                       onClick={() => handleShowDetail(kegiatan)}
                     >
                       {kegiatan.judul}
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
+                    <td className="px-6  text-gray-600">
                       {formatDateDisplay(kegiatan.tanggal)}
                     </td>
                     <td
-                      className="px-6 py-4 text-gray-700 break-words cursor-pointer hover:text-green-600"
+                      className="px-6 py-2 text-gray-700 break-words cursor-pointer hover:text-green-600"
                       onClick={() => handleShowDetail(kegiatan)}
                     >
                       <div className="max-w-xs overflow-hidden">
@@ -685,7 +685,7 @@ export default function HalamanKegiatan() {
                           : kegiatan.deskripsi}
                       </div>
                     </td>
-                    <td className="px-6 py-2">
+                    <td className="px-6 ">
                       {kegiatan.foto ? (
                         <img
                           src={kegiatan.foto}
@@ -699,7 +699,7 @@ export default function HalamanKegiatan() {
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4">
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(i)}
@@ -729,7 +729,7 @@ export default function HalamanKegiatan() {
           </table>
         </div>
       </div>
-      <div className="pt-6 pb-6 flex justify-between items-center px-6">
+      <div className="pt-4 flex justify-between items-center px-6">
         {totalPages > 1 ? (
           <div className="flex items-center gap-2">
             {/* Tombol Previous */}

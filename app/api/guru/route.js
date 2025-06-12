@@ -147,84 +147,132 @@ export async function DELETE(request) {
   }
 }
 
+// PUT: update guru
 export async function PUT(request) {
   try {
-    const contentType = request.headers.get('content-type');
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
 
-    // Handle multipart/form-data (update dengan foto baru)
+    if (!id) {
+      return new NextResponse("ID guru tidak ditemukan", { status: 400 });
+    }
+
+    const contentType = request.headers.get('content-type');
+    
+    // Handle file upload (FormData) - untuk update foto
     if (contentType && contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
-      const id = formData.get('id');
-      const nama = formData.get('nama');
-      const jabatan = formData.get('jabatan');
-      const nip = formData.get('nip');
-      const tempat = formData.get('tempat');
-      const tanggal_lahir = formData.get('tanggal_lahir');
-      const jenis_kelamin = formData.get('jenis_kelamin');
       const file = formData.get('file');
-
-      if (!id || !nama || !jabatan || !nip || !tempat || !tanggal_lahir || !jenis_kelamin) {
-        return new NextResponse('Missing required fields', { status: 400 });
+      
+      if (!file || !(file instanceof File)) {
+        return new NextResponse('No file provided', { status: 400 });
       }
 
-      let fotoUrl = null;
-
-      // Jika ada file, upload ke S3
-      if (file && file instanceof File) {
-        const fileExtension = file.name.split('.').pop();
-        const uniqueFileName = `guru/foto/${uuidv4()}.${fileExtension}`;
-
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        const uploadParams = {
-          Bucket: bucketName,
-          Key: uniqueFileName,
-          Body: buffer,
-          ContentType: file.type,
-        };
-
-        await s3.send(new PutObjectCommand(uploadParams));
-        fotoUrl = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${uniqueFileName}`;
-      }
-
-      // Update database
-      const [result] = await db.execute(
-        `UPDATE guru 
-         SET nama = ?, jabatan = ?, nip = ?, tempat = ?, tanggal_lahir = ?, jenis_kelamin = ?, foto = IFNULL(?, foto) 
-         WHERE id_guru = ?`,
-        [nama, jabatan, nip, tempat, tanggal_lahir, jenis_kelamin, fotoUrl, id]
-      );
-
-      if (result.affectedRows === 0) {
+      // Get current guru data to delete old photo
+      const [guruRows] = await db.execute("SELECT foto FROM guru WHERE id_guru = ?", [id]);
+      
+      if (guruRows.length === 0) {
         return new NextResponse("Guru tidak ditemukan", { status: 404 });
       }
 
-      return NextResponse.json({ message: 'Data guru berhasil diperbarui' });
+      const currentGuru = guruRows[0];
+
+      // Generate unique filename for new photo
+      const fileExtension = file.name.split('.').pop();
+      const uniqueFileName = `guru/foto/${uuidv4()}.${fileExtension}`;
+
+      // Convert file to buffer
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // Upload new photo to S3
+      const uploadParams = {
+        Bucket: bucketName,
+        Key: uniqueFileName,
+        Body: buffer,
+        ContentType: file.type,
+      };
+
+      await s3.send(new PutObjectCommand(uploadParams));
+
+      // Delete old photo from S3 if exists
+      if (currentGuru.foto && currentGuru.foto.includes(bucketName)) {
+        try {
+          const s3Key = currentGuru.foto.split(`${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/`)[1];
+          
+          if (s3Key) {
+            const deleteParams = {
+              Bucket: bucketName,
+              Key: s3Key,
+            };
+
+            await s3.send(new DeleteObjectCommand(deleteParams));
+          }
+        } catch (s3Error) {
+          console.error('Error deleting old S3 file:', s3Error);
+        }
+      }
+
+      // Return new S3 URL
+      const s3Url = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${uniqueFileName}`;
+      
+      return NextResponse.json({ url: s3Url });
     }
+    
+    // Handle data update (JSON)
+    else {
+      const {
+        nama,
+        jabatan,
+        nip,
+        tempat,
+        tanggal_lahir,
+        jenis_kelamin,
+        foto
+      } = await request.json();
 
-    // Handle application/json (update tanpa ganti foto)
-    const { id, nama, jabatan, nip, tempat, tanggal_lahir, jenis_kelamin } = await request.json();
+      // Check if guru exists
+      const [existingRows] = await db.execute("SELECT * FROM guru WHERE id_guru = ?", [id]);
+      
+      if (existingRows.length === 0) {
+        return new NextResponse("Guru tidak ditemukan", { status: 404 });
+      }
 
-    if (!id || !nama || !jabatan || !nip || !tempat || !tanggal_lahir || !jenis_kelamin) {
-      return new NextResponse('Missing required fields', { status: 400 });
+      // Update guru data
+      const [result] = await db.execute(
+        `UPDATE guru SET 
+        nama = COALESCE(?, nama),
+        jabatan = COALESCE(?, jabatan),
+        nip = COALESCE(?, nip),
+        tempat = COALESCE(?, tempat),
+        tanggal_lahir = COALESCE(?, tanggal_lahir),
+        jenis_kelamin = COALESCE(?, jenis_kelamin),
+        foto = COALESCE(?, foto),
+        created_at = NOW()
+        WHERE id_guru = ?`,
+        [
+          nama,
+          jabatan,
+          nip,
+          tempat,
+          tanggal_lahir,
+          jenis_kelamin,
+          foto,
+          id
+        ]
+      );
+
+      if (result.affectedRows === 0) {
+        return new NextResponse("Gagal mengupdate data guru", { status: 500 });
+      }
+
+      // Get updated guru data
+      const [updatedRows] = await db.execute("SELECT * FROM guru WHERE id_guru = ?", [id]);
+      
+      return NextResponse.json(updatedRows[0], { status: 200 });
     }
-
-    const [result] = await db.execute(
-      `UPDATE guru 
-       SET nama = ?, jabatan = ?, nip = ?, tempat = ?, tanggal_lahir = ?, jenis_kelamin = ?
-       WHERE id_guru = ?`,
-      [nama, jabatan, nip, tempat, tanggal_lahir, jenis_kelamin, id]
-    );
-
-    if (result.affectedRows === 0) {
-      return new NextResponse("Guru tidak ditemukan", { status: 404 });
-    }
-
-    return NextResponse.json({ message: 'Data guru berhasil diperbarui' });
-
   } catch (error) {
-    console.error("PUT /api/guru error:", error);
+    console.error('PUT /api/guru error:', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

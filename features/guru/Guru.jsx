@@ -338,7 +338,7 @@ export default function HalamanGuru() {
   };
 
   const sortedGuru = [...dataGuru].sort((a, b) => {
-    if (sortBy === "nama") {
+    if (sortBy === "nama") { 
       return sortOrder === "asc"
         ? a.nama.localeCompare(b.nama)
         : b.nama.localeCompare(a.nama);
