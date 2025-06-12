@@ -146,3 +146,85 @@ export async function DELETE(request) {
     return new NextResponse("Gagal menghapus guru", { status: 500 });
   }
 }
+
+export async function PUT(request) {
+  try {
+    const contentType = request.headers.get('content-type');
+
+    // Handle multipart/form-data (update dengan foto baru)
+    if (contentType && contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      const id = formData.get('id');
+      const nama = formData.get('nama');
+      const jabatan = formData.get('jabatan');
+      const nip = formData.get('nip');
+      const tempat = formData.get('tempat');
+      const tanggal_lahir = formData.get('tanggal_lahir');
+      const jenis_kelamin = formData.get('jenis_kelamin');
+      const file = formData.get('file');
+
+      if (!id || !nama || !jabatan || !nip || !tempat || !tanggal_lahir || !jenis_kelamin) {
+        return new NextResponse('Missing required fields', { status: 400 });
+      }
+
+      let fotoUrl = null;
+
+      // Jika ada file, upload ke S3
+      if (file && file instanceof File) {
+        const fileExtension = file.name.split('.').pop();
+        const uniqueFileName = `guru/foto/${uuidv4()}.${fileExtension}`;
+
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        const uploadParams = {
+          Bucket: bucketName,
+          Key: uniqueFileName,
+          Body: buffer,
+          ContentType: file.type,
+        };
+
+        await s3.send(new PutObjectCommand(uploadParams));
+        fotoUrl = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${uniqueFileName}`;
+      }
+
+      // Update database
+      const [result] = await db.execute(
+        `UPDATE guru 
+         SET nama = ?, jabatan = ?, nip = ?, tempat = ?, tanggal_lahir = ?, jenis_kelamin = ?, foto = IFNULL(?, foto) 
+         WHERE id_guru = ?`,
+        [nama, jabatan, nip, tempat, tanggal_lahir, jenis_kelamin, fotoUrl, id]
+      );
+
+      if (result.affectedRows === 0) {
+        return new NextResponse("Guru tidak ditemukan", { status: 404 });
+      }
+
+      return NextResponse.json({ message: 'Data guru berhasil diperbarui' });
+    }
+
+    // Handle application/json (update tanpa ganti foto)
+    const { id, nama, jabatan, nip, tempat, tanggal_lahir, jenis_kelamin } = await request.json();
+
+    if (!id || !nama || !jabatan || !nip || !tempat || !tanggal_lahir || !jenis_kelamin) {
+      return new NextResponse('Missing required fields', { status: 400 });
+    }
+
+    const [result] = await db.execute(
+      `UPDATE guru 
+       SET nama = ?, jabatan = ?, nip = ?, tempat = ?, tanggal_lahir = ?, jenis_kelamin = ?
+       WHERE id_guru = ?`,
+      [nama, jabatan, nip, tempat, tanggal_lahir, jenis_kelamin, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return new NextResponse("Guru tidak ditemukan", { status: 404 });
+    }
+
+    return NextResponse.json({ message: 'Data guru berhasil diperbarui' });
+
+  } catch (error) {
+    console.error("PUT /api/guru error:", error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
+}

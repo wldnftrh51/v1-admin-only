@@ -11,6 +11,7 @@ import {
   XCircle,
   AlertTriangle,
   CheckCircle2,
+  X,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 
@@ -20,6 +21,12 @@ export default function HalamanPendaftar() {
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // State untuk detail modal
+  const [detailModal, setDetailModal] = useState({
+    show: false,
+    pendaftar: null,
+  });
 
   // Enhanced notification state
   const [notification, setNotification] = useState({
@@ -54,6 +61,16 @@ export default function HalamanPendaftar() {
   // Function untuk menutup notifikasi
   const closeNotification = () => {
     setNotification((prev) => ({ ...prev, show: false }));
+  };
+
+  // Function untuk menampilkan detail modal
+  const showDetailModal = (pendaftar) => {
+    setDetailModal({ show: true, pendaftar });
+  };
+
+  // Function untuk menutup detail modal
+  const closeDetailModal = () => {
+    setDetailModal({ show: false, pendaftar: null });
   };
 
   useEffect(() => {
@@ -216,6 +233,593 @@ export default function HalamanPendaftar() {
     );
   };
 
+  // Detail Modal Component
+  const DetailModal = () => {
+    if (!detailModal.show || !detailModal.pendaftar) return null;
+
+    const item = detailModal.pendaftar;
+
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-green-600 to-green-600 text-white p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                  <Eye className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">Detail Pendaftar</h3>
+                  <p className="text-blue-100 text-sm">
+                    Informasi lengkap data pendaftar
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={closeDetailModal}
+                className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-6 overflow-y-auto max-h-[calc(80vh-140px)]">
+            {/* Nama Lengkap - Featured */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-6">
+              <h4 className="text-2xl font-bold text-gray-800 mb-2">
+                {item.nama_lengkap}
+              </h4>
+              <p className="text-green-600 font-medium">
+                ID Siswa: {item.id_siswa}
+              </p>
+            </div>
+
+            {/* Data Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                  Nama Panggilan
+                </span>
+                <p className="text-gray-800 mt-2 text-lg">
+                  {item.nama_panggilan || "-"}
+                </p>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                  Tempat Lahir
+                </span>
+                <p className="text-gray-800 mt-2 text-lg">
+                  {item.tempat_lahir || "-"}
+                </p>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                  Tanggal Lahir
+                </span>
+                <p className="text-gray-800 mt-2 text-lg">
+                  {item.tanggal_lahir
+                    ? new Date(item.tanggal_lahir).toLocaleDateString("id-ID", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "-"}
+                </p>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                  Jenis Kelamin
+                </span>
+                <p className="text-gray-800 mt-2 text-lg">
+                  {item.jenis_kelamin || "-"}
+                </p>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                  Agama
+                </span>
+                <p className="text-gray-800 mt-2 text-lg">
+                  {item.agama || "-"}
+                </p>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                  Anak ke
+                </span>
+                <p className="text-gray-800 mt-2 text-lg">
+                  {item.anak_ke || "-"}
+                </p>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                  Jumlah Saudara
+                </span>
+                <p className="text-gray-800 mt-2 text-lg">
+                  {item.jumlah_saudara || "-"}
+                </p>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                  Status Dalam Keluarga
+                </span>
+                <p className="text-gray-800 mt-2 text-lg">
+                  {item.status_dalam_keluarga || "-"}
+                </p>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition-colors md:col-span-2">
+                <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                  Kewarganegaraan
+                </span>
+                <p className="text-gray-800 mt-2 text-lg">
+                  {item.kewarganegaraan || "-"}
+                </p>
+              </div>
+            </div>
+
+            {/* Data Ayah */}
+            <div className="mt-10">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                Data Ayah
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Nama
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ayah_nama || "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Tempat Lahir
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ayah_tempat_lahir || "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Tanggal Lahir
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ayah_tanggal_lahir
+                      ? new Date(item.ayah_tanggal_lahir).toLocaleDateString(
+                          "id-ID",
+                          {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                          }
+                        )
+                      : "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Agama
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ayah_agama || "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Kewarganegaraan
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ayah_kewarganegaraan || "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Pekerjaan
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ayah_pekerjaan || "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Pendidikan
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ayah_pendidikan || "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Status Dalam Keluarga
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ayah_status_dalam_keluarga || "-"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Ibu */}
+            <div className="mt-10">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                Data Ibu
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Nama
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ibu_nama || "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Tempat Lahir
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ibu_tempat_lahir || "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Tanggal Lahir
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ibu_tanggal_lahir
+                      ? new Date(item.ibu_tanggal_lahir).toLocaleDateString(
+                          "id-ID",
+                          {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                          }
+                        )
+                      : "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Agama
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ibu_agama || "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Kewarganegaraan
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ibu_kewarganegaraan || "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Pekerjaan
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ibu_pekerjaan || "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Pendidikan
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ibu_pendidikan || "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100">
+                  <span className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                    Status Dalam Keluarga
+                  </span>
+                  <p className="text-gray-800 mt-2 text-lg">
+                    {item.ibu_status_dalam_keluarga || "-"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* File Upload / Dokumen */}
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                Berkas / Dokumen
+              </h3>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                {(() => {
+                  try {
+                    let filePaths = [];
+
+                    if (item.file_path) {
+                      if (typeof item.file_path === "string") {
+                        const trimmed = item.file_path.trim();
+
+                        // Coba parse sebagai JSON array dulu
+                        if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                          try {
+                            const parsed = JSON.parse(trimmed);
+                            if (Array.isArray(parsed)) {
+                              filePaths = parsed.filter(
+                                (path) => path && path.trim().length > 0
+                              );
+                            } else {
+                              throw new Error("Not an array");
+                            }
+                          } catch (jsonError) {
+                            // Jika JSON.parse gagal, fallback ke manual parsing
+                            console.warn(
+                              "JSON parse failed, using manual parsing:",
+                              jsonError
+                            );
+                            const content = trimmed.slice(1, -1); // Hapus [ dan ]
+                            filePaths = content
+                              .split(",")
+                              .map((path) =>
+                                path.trim().replace(/^["']|["']$/g, "")
+                              )
+                              .filter((path) => path.length > 0);
+                          }
+                        }
+                        // Jika ada koma tapi bukan format array
+                        else if (trimmed.includes(",")) {
+                          filePaths = trimmed
+                            .split(",")
+                            .map((path) =>
+                              path.trim().replace(/^["']|["']$/g, "")
+                            )
+                            .filter((path) => path.length > 0);
+                        }
+                        // Single file path
+                        else {
+                          filePaths = [trimmed];
+                        }
+                      }
+                      // Jika sudah array
+                      else if (Array.isArray(item.file_path)) {
+                        filePaths = item.file_path.filter(
+                          (path) => path && path.trim().length > 0
+                        );
+                      }
+                      // Fallback untuk tipe data lain
+                      else {
+                        filePaths = [String(item.file_path)];
+                      }
+                    }
+
+                    filePaths = filePaths.filter(path => {
+  const cleanPath = String(path).trim();
+  return cleanPath.length > 0 && !cleanPath.match(/^[\[\]"'\s]*$/);
+});
+
+
+                    if (filePaths.length > 0) {
+                      return (
+                        <div className="space-y-3">
+                          <p className="text-sm text-gray-600 mb-3">
+                            Ditemukan {filePaths.length} berkas:
+                          </p>
+                          {filePaths.map((filePath, index) => {
+                            const cleanFilePath = String(filePath).trim();
+                            const fileName =
+                              cleanFilePath.split("/").pop() ||
+                              `File ${index + 1}`;
+                            const fileExtension = fileName
+                              .split(".")
+                              .pop()
+                              ?.toLowerCase();
+                            const isImage = [
+                              "jpg",
+                              "jpeg",
+                              "png",
+                              "gif",
+                              "webp",
+                              "svg",
+                            ].includes(fileExtension || "");
+
+                            return (
+                              <div
+                                key={index}
+                                className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                      isImage ? "bg-blue-100" : "bg-gray-100"
+                                    }`}
+                                  >
+                                    {isImage ? (
+                                      <svg
+                                        className="w-5 h-5 text-blue-600"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
+                                      </svg>
+                                    ) : (
+                                      <svg
+                                        className="w-5 h-5 text-gray-600"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                        />
+                                      </svg>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-gray-800 text-sm">
+                                      Berkas {index + 1}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      {fileExtension?.toUpperCase()} •{" "}
+                                      {fileName.length > 30
+                                        ? fileName.substring(0, 30) + "..."
+                                        : fileName}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  {isImage && (
+                                    <button
+                                      onClick={() => {
+                                        const imgModal =
+                                          document.createElement("div");
+                                        imgModal.className =
+                                          "fixed inset-0 bg-black/80 flex items-center justify-center z-[60] p-4";
+                                        imgModal.innerHTML = `
+                              <div class="relative max-w-4xl max-h-full">
+                                <button class="absolute -top-10 right-0 text-white hover:text-gray-300 text-xl font-bold">&times;</button>
+                                <img src="${cleanFilePath}" alt="Preview" class="max-w-full max-h-full object-contain rounded-lg" />
+                              </div>
+                            `;
+                                        document.body.appendChild(imgModal);
+                                        imgModal.addEventListener(
+                                          "click",
+                                          (e) => {
+                                            if (
+                                              e.target === imgModal ||
+                                              e.target.textContent === "×"
+                                            ) {
+                                              document.body.removeChild(
+                                                imgModal
+                                              );
+                                            }
+                                          }
+                                        );
+                                      }}
+                                      className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                                    >
+                                      Preview
+                                    </button>
+                                  )}
+
+                                  <a
+                                    href={cleanFilePath}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                                  >
+                                    Buka
+                                  </a>
+
+                                  <a
+                                    href={cleanFilePath}
+                                    download
+                                    className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                                  >
+                                    Unduh
+                                  </a>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="text-center py-8">
+                          <svg
+                            className="w-12 h-12 text-gray-300 mx-auto mb-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                          <p className="text-gray-600">
+                            Tidak ada berkas tersedia
+                          </p>
+                        </div>
+                      );
+                    }
+                  } catch (error) {
+                    console.error("Error parsing file_path:", error);
+                    return (
+                      <div className="text-center py-8">
+                        <svg
+                          className="w-12 h-12 text-red-300 mx-auto mb-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <p className="text-red-600">Error memuat berkas</p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Format data berkas tidak valid
+                        </p>
+                      </div>
+                    );
+                  }
+                })()}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="bg-gray-50 border-t border-gray-200 p-6">
+            <div className="flex justify-end">
+              <button
+                onClick={closeDetailModal}
+                className="bg-btn text-white font-semibold py-2 px-6 rounded-lg transition-colors flex items-center gap-2"
+              >
+                <Eye className="w-4 h-4" />
+                Tutup Detail
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 bg-gray-50">
@@ -250,6 +854,9 @@ export default function HalamanPendaftar() {
     <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 bg-gray-50">
       {/* Enhanced Notification Popup */}
       <NotificationPopup />
+
+      {/* Detail Modal */}
+      <DetailModal />
 
       {/* Enhanced Confirmation Modal */}
       {confirmDelete.show && (
@@ -365,161 +972,56 @@ export default function HalamanPendaftar() {
             <tbody>
               {filteredData.length > 0 ? (
                 filteredData.map((item, index) => (
-                  <>
-                    <tr
-                      key={item.id_siswa}
-                      className={`hover:bg-blue-50 transition-colors ${
-                        index % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
-                      }`}
-                    >
-                      <td className="px-6 py-4 text-gray-800 font-medium">
-                        {item.nama_lengkap}
-                      </td>
-                      <td className="px-6 py-4 text-gray-600">
-                        {item.tempat_lahir}
-                      </td>
-                      <td className="px-6 py-4 text-gray-600">
-                        {item.tanggal_lahir
-                          ? new Date(item.tanggal_lahir).toLocaleDateString(
-                              "id-ID",
-                              {
-                                day: "2-digit",
-                                month: "long",
-                                year: "numeric",
-                              }
-                            )
-                          : "-"}
-                      </td>
-                      <td className="px-6 py-4 text-gray-600">
-                        {item.jenis_kelamin}
-                      </td>
-                      <td className="px-6 py-4 text-gray-600">{item.agama}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => showDeleteConfirmation(item)}
-                            className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
-                            title="Hapus data"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                          <button
-                            onClick={() =>
-                              setSelected(
-                                selected?.id_siswa === item.id_siswa
-                                  ? null
-                                  : item
-                              )
+                  <tr
+                    key={item.id_siswa}
+                    className={`hover:bg-blue-50 transition-colors ${
+                      index % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
+                    }`}
+                  >
+                    <td className="px-6 py-4 text-gray-800 font-medium">
+                      {item.nama_lengkap}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {item.tempat_lahir}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {item.tanggal_lahir
+                        ? new Date(item.tanggal_lahir).toLocaleDateString(
+                            "id-ID",
+                            {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
                             }
-                            className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
-                            title={
-                              selected?.id_siswa === item.id_siswa
-                                ? "Tutup detail"
-                                : "Lihat detail"
-                            }
-                          >
-                            {selected?.id_siswa === item.id_siswa ? (
-                              <span className="flex items-center gap-1">
-                                <Eye size={16} />
-                                Tutup
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-1">
-                                <Eye size={16} />
-                                Detail
-                              </span>
-                            )}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    {selected?.id_siswa === item.id_siswa && (
-                      <tr className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-green-400">
-                        <td colSpan="6" className="px-6 py-6">
-                          <div className="bg-white rounded-lg p-6 shadow-sm border border-blue-200">
-                            <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                              <Eye className="w-5 h-5 text-blue-600" />
-                              Detail Lengkap - {item.nama_lengkap}
-                            </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                              <div className="bg-gray-50 p-3 rounded-lg">
-                                <span className="font-semibold text-gray-700">
-                                  Nama Lengkap:
-                                </span>
-                                <p className="text-gray-800 mt-1">
-                                  {item.nama_lengkap}
-                                </p>
-                              </div>
-                              <div className="bg-gray-50 p-3 rounded-lg">
-                                <span className="font-semibold text-gray-700">
-                                  Nama Panggilan:
-                                </span>
-                                <p className="text-gray-800 mt-1">
-                                  {item.nama_panggilan}
-                                </p>
-                              </div>
-                              <div className="bg-gray-50 p-3 rounded-lg">
-                                <span className="font-semibold text-gray-700">
-                                  Tempat Lahir:
-                                </span>
-                                <p className="text-gray-800 mt-1">
-                                  {item.tempat_lahir}
-                                </p>
-                              </div>
-                              <div className="bg-gray-50 p-3 rounded-lg">
-                                <span className="font-semibold text-gray-700">
-                                  Tanggal Lahir:
-                                </span>
-                                <p className="text-gray-800 mt-1">
-                                  {item.tanggal_lahir}
-                                </p>
-                              </div>
-                              <div className="bg-gray-50 p-3 rounded-lg">
-                                <span className="font-semibold text-gray-700">
-                                  Jenis Kelamin:
-                                </span>
-                                <p className="text-gray-800 mt-1">
-                                  {item.jenis_kelamin}
-                                </p>
-                              </div>
-                              <div className="bg-gray-50 p-3 rounded-lg">
-                                <span className="font-semibold text-gray-700">
-                                  Anak ke:
-                                </span>
-                                <p className="text-gray-800 mt-1">
-                                  {item.anak_ke}
-                                </p>
-                              </div>
-                              <div className="bg-gray-50 p-3 rounded-lg">
-                                <span className="font-semibold text-gray-700">
-                                  Jumlah Saudara:
-                                </span>
-                                <p className="text-gray-800 mt-1">
-                                  {item.jumlah_saudara}
-                                </p>
-                              </div>
-                              <div className="bg-gray-50 p-3 rounded-lg">
-                                <span className="font-semibold text-gray-700">
-                                  Status Dalam Keluarga:
-                                </span>
-                                <p className="text-gray-800 mt-1">
-                                  {item.status_dalam_keluarga}
-                                </p>
-                              </div>
-                              <div className="bg-gray-50 p-3 rounded-lg">
-                                <span className="font-semibold text-gray-700">
-                                  Kewarganegaraan:
-                                </span>
-                                <p className="text-gray-800 mt-1">
-                                  {item.kewarganegaraan}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </>
+                          )
+                        : "-"}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {item.jenis_kelamin}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{item.agama}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => showDeleteConfirmation(item)}
+                          className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                          title="Hapus data"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                        <button
+                          onClick={() => showDetailModal(item)}
+                          className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
+                          title="Lihat detail"
+                        >
+                          <span className="flex items-center gap-1">
+                            <Eye size={16} />
+                            Detail
+                          </span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 ))
               ) : (
                 <tr>

@@ -134,6 +134,157 @@ export async function POST(request) {
   }
 }
 
+// PUT: update siswa
+export async function PUT(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return new NextResponse("ID siswa tidak ditemukan", { status: 400 });
+    }
+
+    const contentType = request.headers.get('content-type');
+    
+    // Handle file upload (FormData) - untuk update foto
+    if (contentType && contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      const file = formData.get('file');
+      
+      if (!file || !(file instanceof File)) {
+        return new NextResponse('No file provided', { status: 400 });
+      }
+
+      // Get current siswa data to delete old photo
+      const [siswaRows] = await db.execute("SELECT file_path FROM siswa WHERE id_siswa = ?", [id]);
+      
+      if (siswaRows.length === 0) {
+        return new NextResponse("Siswa tidak ditemukan", { status: 404 });
+      }
+
+      const currentSiswa = siswaRows[0];
+
+      // Generate unique filename for new photo
+      const fileExtension = file.name.split('.').pop();
+      const uniqueFileName = `siswa/foto/${uuidv4()}.${fileExtension}`;
+
+      // Convert file to buffer
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // Upload new photo to S3
+      const uploadParams = {
+        Bucket: bucketName,
+        Key: uniqueFileName,
+        Body: buffer,
+        ContentType: file.type,
+      };
+
+      await s3.send(new PutObjectCommand(uploadParams));
+
+      // Delete old photo from S3 if exists
+      if (currentSiswa.file_path && currentSiswa.file_path.includes(bucketName)) {
+        try {
+          const s3Key = currentSiswa.file_path.split(`${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/`)[1];
+          
+          if (s3Key) {
+            const deleteParams = {
+              Bucket: bucketName,
+              Key: s3Key,
+            };
+
+            await s3.send(new DeleteObjectCommand(deleteParams));
+          }
+        } catch (s3Error) {
+          console.error('Error deleting old S3 file:', s3Error);
+        }
+      }
+
+      // Return new S3 URL
+      const s3Url = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${uniqueFileName}`;
+      
+      return NextResponse.json({ url: s3Url });
+    }
+    
+    // Handle data update (JSON)
+    else {
+      const {
+        nama_lengkap,
+        nisn,
+        alamat,
+        kelas,
+        jenis_kelamin,
+        nama_panggilan,
+        tempat_lahir,
+        tanggal_lahir,
+        anak_ke,
+        jumlah_saudara,
+        agama,
+        status_dalam_keluarga,
+        kewarganegaraan,
+        file_path
+      } = await request.json();
+
+      // Check if siswa exists
+      const [existingRows] = await db.execute("SELECT * FROM siswa WHERE id_siswa = ?", [id]);
+      
+      if (existingRows.length === 0) {
+        return new NextResponse("Siswa tidak ditemukan", { status: 404 });
+      }
+
+      // Update siswa data
+      const [result] = await db.execute(
+        `UPDATE siswa SET 
+        nama_lengkap = COALESCE(?, nama_lengkap),
+        nisn = COALESCE(?, nisn),
+        alamat = COALESCE(?, alamat),
+        kelas = COALESCE(?, kelas),
+        jenis_kelamin = COALESCE(?, jenis_kelamin),
+        nama_panggilan = COALESCE(?, nama_panggilan),
+        tempat_lahir = COALESCE(?, tempat_lahir),
+        tanggal_lahir = COALESCE(?, tanggal_lahir),
+        anak_ke = COALESCE(?, anak_ke),
+        jumlah_saudara = COALESCE(?, jumlah_saudara),
+        agama = COALESCE(?, agama),
+        status_dalam_keluarga = COALESCE(?, status_dalam_keluarga),
+        kewarganegaraan = COALESCE(?, kewarganegaraan),
+        file_path = COALESCE(?, file_path),
+        created_at = NOW()
+        WHERE id_siswa = ?`,
+        [
+          nama_lengkap,
+          nisn,
+          alamat,
+          kelas,
+          jenis_kelamin,
+          nama_panggilan,
+          tempat_lahir,
+          tanggal_lahir,
+          anak_ke,
+          jumlah_saudara,
+          agama,
+          status_dalam_keluarga,
+          kewarganegaraan,
+          file_path,
+          id
+        ]
+      );
+
+      if (result.affectedRows === 0) {
+        return new NextResponse("Gagal mengupdate data siswa", { status: 500 });
+      }
+
+      // Get updated siswa data
+      const [updatedRows] = await db.execute("SELECT * FROM siswa WHERE id_siswa = ?", [id]);
+      
+      return NextResponse.json(updatedRows[0], { status: 200 });
+    }
+  } catch (error) {
+    console.error('PUT /api/siswa error:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
+}
+
 // DELETE: hapus siswa beserta fotonya di S3
 export async function DELETE(request) {
   const { searchParams } = new URL(request.url);

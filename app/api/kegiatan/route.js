@@ -142,19 +142,24 @@ export async function DELETE(request) {
   }
 }
 
-// PUT untuk update data kegiatan
 export async function PUT(request) {
   try {
-    const { id_kegiatan, judul, tanggal, deskripsi, foto } = await request.json();
+    const bodyText = await request.text();
+    console.log('PUT Request body raw:', bodyText);
+
+    const payload = JSON.parse(bodyText);
+    const { id_kegiatan, judul, tanggal, deskripsi, foto } = payload;
 
     if (!id_kegiatan || !judul || !tanggal || !deskripsi) {
       return new NextResponse(JSON.stringify({ error: 'Semua field harus diisi' }), { status: 400 });
     }
 
     const [result] = await db.execute(
-      'UPDATE kegiatan SET judul = ?, tanggal = ?, deskripsi = ?, foto = ?, updated_at = NOW() WHERE id_kegiatan = ?',
-      [judul, tanggal, deskripsi, foto || null, id_kegiatan]
+      'UPDATE kegiatan SET judul = ?, tanggal = ?, deskripsi = ?, foto = ?, created_at = NOW() WHERE id_kegiatan = ?',
+      [judul, tanggal, deskripsi, foto ?? '', id_kegiatan]
     );
+
+    console.log('Update result:', result);
 
     if (result.affectedRows === 0) {
       return new NextResponse('Kegiatan tidak ditemukan', { status: 404 });

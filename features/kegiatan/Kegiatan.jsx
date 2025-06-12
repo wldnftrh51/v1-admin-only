@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import {FaEdit } from "react-icons/fa";
 import {
   Trash2,
-  Edit2,
   CheckCircle,
   XCircle,
   AlertTriangle,
@@ -384,7 +384,7 @@ export default function HalamanKegiatan() {
   };
 
   return (
-    <div className="items-center justify-center min-h-screen w-full p-8 bg-gray-50">
+    <div className="items-center justify-center min-h-screen w-full p-8 pb-0 bg-gray-50">
       {/* Enhanced Notification Popup */}
       <NotificationPopup />
 
@@ -639,7 +639,7 @@ export default function HalamanKegiatan() {
                         : kegiatan.deskripsi}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-2">
                     {kegiatan.foto ? (
                       <img
                         src={kegiatan.foto}
@@ -660,7 +660,7 @@ export default function HalamanKegiatan() {
                         className="text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors"
                         title="Edit kegiatan"
                       >
-                        <Edit2 size={18} />
+                        <FaEdit size={16} />
                       </button>
                       <button
                         onClick={() =>
@@ -672,7 +672,7 @@ export default function HalamanKegiatan() {
                         className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
                         title="Hapus kegiatan"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </td>
@@ -682,9 +682,9 @@ export default function HalamanKegiatan() {
           </tbody>
         </table>
       </div>
-      <div className="pt-10 flex justify-end">
+      <div className="pt-6 flex justify-end">
         <button
-          className="flex items-center gap-2 px-6 py-3 bg-btn text-white font-medium rounded-lg transition-colors shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-btn text-white rounded text-lg transition-colors shadow-md"
           onClick={() => {
             setForm({
               judul: "",
