@@ -39,7 +39,7 @@ export default function HalamanSiswa() {
 
   // State untuk pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10); // Bisa diubah sesuai kebutuhan
+  const [itemsPerPage] = useState(6); 
 
   // State untuk notification popup
   const [notification, setNotification] = useState({
@@ -248,7 +248,7 @@ export default function HalamanSiswa() {
         showNotification(
           "success",
           "Berhasil",
-          "Data siswa berhasil diperbarui!"
+          "Data siswa berhasil diupdate!"
         );
       } else {
         // Tambah siswa baru
@@ -269,7 +269,7 @@ export default function HalamanSiswa() {
       setShowModal(false);
       resetForm();
     } catch (error) {
-      const action = editMode ? "memperbarui" : "menambahkan";
+      const action = editMode ? "mengupdate" : "menambahkan";
       showNotification(
         "error",
         "Error",
@@ -695,7 +695,7 @@ export default function HalamanSiswa() {
         </div>
       </div>
 
-      {/* Modal Detail Guru */}
+      {/* Modal Detail Siswa */}
       {showDetailModal && selectedSiswa && (
         <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-xl p-8 max-w-2xl w-full shadow-2xl mx-4 max-h-[90vh] overflow-y-auto">
@@ -1129,10 +1129,10 @@ export default function HalamanSiswa() {
                 {loading ? (
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    {editMode ? "Memperbarui..." : "Menyimpan..."}
+                    {editMode ? "Mengupdate..." : "Menyimpan..."}
                   </div>
                 ) : editMode ? (
-                  "Perbarui"
+                  "Update"
                 ) : (
                   "Simpan"
                 )}

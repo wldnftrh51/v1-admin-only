@@ -26,12 +26,12 @@ export default function HalamanKegiatan() {
   const [sortOrder, setSortOrder] = useState("desc");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4; // Jumlah item per halaman
+  const itemsPerPage = 4; 
 
   // Enhanced notification state
   const [notification, setNotification] = useState({
     show: false,
-    type: "", // 'success', 'error', 'warning', 'info'
+    type: "", 
     title: "",
     message: "",
   });
@@ -76,7 +76,7 @@ export default function HalamanKegiatan() {
     setNotification((prev) => ({ ...prev, show: false }));
   };
 
-  // Function untuk mengkonversi tanggal ke format YYYY-MM-DD
+  // Function untuk mengkonversi tanggal 
   const formatDateForInput = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -135,7 +135,7 @@ export default function HalamanKegiatan() {
     setLoading(true);
     let fotoURL = form.fotoURL;
 
-    // Upload foto jika ada file baru
+    // Upload foto
     if (form.foto) {
       try {
         const formData = new FormData();
@@ -239,7 +239,7 @@ export default function HalamanKegiatan() {
   };
 
   const handleEdit = (index) => {
-    const kegiatan = filteredKegiatan[index]; // Ambil dari filteredKegiatan karena index berlaku untuk halaman saat ini
+    const kegiatan = filteredKegiatan[index]; 
     setForm({
       judul: kegiatan.judul,
       tanggal: formatDateForInput(kegiatan.tanggal),
@@ -247,8 +247,6 @@ export default function HalamanKegiatan() {
       foto: null,
       fotoURL: kegiatan.foto || "",
     });
-    // Kita perlu menemukan index asli di dataKegiatan jika ingin mengedit berdasarkan index global
-    // Atau bisa langsung menggunakan id_kegiatan untuk update API
     const globalIndex = dataKegiatan.findIndex(item => item.id_kegiatan === kegiatan.id_kegiatan);
     setEditIndex(globalIndex);
     setShowModal(true);
@@ -283,7 +281,6 @@ export default function HalamanKegiatan() {
         "Berhasil Dihapus",
         `Kegiatan "${judul}" telah dihapus`
       );
-      // Optional: If current page becomes empty after deletion, go to previous page
       if (currentData.length === 1 && currentPage > 1) {
         setCurrentPage(prev => prev - 1);
       }
@@ -334,7 +331,6 @@ export default function HalamanKegiatan() {
       item.deskripsi.toLowerCase().includes(search.toLowerCase())
   );
 
-  // *** PAGINATION LOGIC START ***
   // Total halaman berdasarkan data yang sudah difilter
   const totalPages = Math.ceil(filteredKegiatan.length / itemsPerPage);
 
@@ -365,8 +361,6 @@ export default function HalamanKegiatan() {
   const goToPage = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
-  // *** PAGINATION LOGIC END ***
-
 
   // Enhanced Notification Component
   const NotificationPopup = () => {
@@ -754,7 +748,7 @@ export default function HalamanKegiatan() {
             </button>
           </div>
         ) : (
-          <div /> // Placeholder if no pagination is needed
+          <div /> 
         )}
         <button
           className="flex items-center gap-2 px-4 py-2 bg-btn text-white rounded-lg text-sm md:text-lg transition-colors shadow-md hover:bg-blue-700"
@@ -852,7 +846,7 @@ export default function HalamanKegiatan() {
                   </div>
                 )}
 
-                {/* Preview foto yang sudah ada (untuk edit) */}
+                {/* Preview foto yang sudah ada */}
                 {!form.foto && form.fotoURL && editIndex !== null && (
                   <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
                     <img

@@ -6,10 +6,12 @@ import Image from "next/image"
 export default function Home() {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [error, setError] = useState('')
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         setLoading(true)
+        setError('')
 
         const email = e.target.email.value
         const password = e.target.password.value
@@ -24,14 +26,18 @@ export default function Home() {
             const data = await res.json()
 
             if (res.ok) {
-                localStorage.setItem('token', data.token)
+                // Token akan otomatis tersimpan di cookie oleh server
                 localStorage.setItem('user', JSON.stringify(data.user))
-                router.push('/dashboard')
+                
+                // Redirect ke dashboard atau halaman yang dituju dari query parameter
+                const urlParams = new URLSearchParams(window.location.search)
+                const redirectTo = urlParams.get('redirect') || '/dashboard'
+                router.push(redirectTo)
             } else {
-                alert(data.error || 'Login gagal')
+                setError(data.error || 'Login gagal')
             }
         } catch (error) {
-            alert('Terjadi kesalahan jaringan')
+            setError('Terjadi kesalahan jaringan')
         } finally {
             setLoading(false)
         }
@@ -50,6 +56,12 @@ export default function Home() {
                     <h1 className="text-2xl font-semibold text-gray-800">Login Admin</h1>
                     <p className="text-sm text-gray-500">Masuk ke dashboard TK AZIZAH 2</p>
                 </div>
+
+                {error && (
+                    <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+                        {error}
+                    </div>
+                )}
 
                 <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
@@ -81,7 +93,7 @@ export default function Home() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-green-500 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 disabled:bg-gray-400"
+                        className="w-full bg-btn text-white font-medium py-2 px-4 rounded-lg transition duration-300 disabled:bg-gray-400"
                     >
                         {loading ? 'Memproses...' : 'Masuk'}
                     </button>

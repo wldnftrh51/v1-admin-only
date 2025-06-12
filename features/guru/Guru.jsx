@@ -26,10 +26,10 @@ export default function HalamanGuru() {
   const [dataGuru, setDataGuru] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Enhanced notification state (mengganti toast state)
+  // Enhanced notification state 
   const [notification, setNotification] = useState({
     show: false,
-    type: "", // 'success', 'error', 'warning', 'info'
+    type: "", 
     title: "",
     message: "",
   });
@@ -285,7 +285,7 @@ export default function HalamanGuru() {
       tempatLahir: guru.tempat,
       tanggalLahir: guru.tanggal_lahir,
       jenisKelamin: guru.jenis_kelamin,
-      foto: null, // Reset foto, akan menggunakan foto lama jika tidak diubah
+      foto: null, 
     });
     setShowModal(true);
   };
@@ -300,7 +300,7 @@ export default function HalamanGuru() {
   const deleteGuru = async () => {
     if (!guruToDelete) return;
 
-    setLoadingDelete(true); // Mulai loading sebelum aksi delete
+    setLoadingDelete(true); 
 
     try {
       const res = await fetch(
@@ -406,7 +406,7 @@ export default function HalamanGuru() {
     return age;
   };
 
-  // Enhanced Notification Component (mengganti Toast Component)
+  // Enhanced Notification Component 
   const NotificationPopup = () => {
     if (!notification.show) return null;
 
@@ -469,7 +469,7 @@ export default function HalamanGuru() {
 
   return (
     <div className="flex flex-col min-h-screen w-full p-2 md:p-8 pb-0 bg-gray-50">
-      {/* Enhanced Notification Popup (mengganti Toast) */}
+      {/* Enhanced Notification Popup */}
       <NotificationPopup />
 
       <div className="flex flex-col flex-grow p-6 w-full">
@@ -631,7 +631,7 @@ export default function HalamanGuru() {
           <div />
         )}
 
-        {/* Tombol Ekspor + Tambahkan Guru di kanan */}
+        {/* Tombol Ekspor + Tambahkan Guru */}
         <div className="flex items-center gap-2">
           <button
             className="text-green-600 text-2xl hover:text-green-800"
