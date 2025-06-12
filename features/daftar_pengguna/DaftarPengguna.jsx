@@ -13,7 +13,7 @@ export default function HalamanDaftarPengguna() {
   // Enhanced notification state
   const [notification, setNotification] = useState({
     show: false,
-    type: "", // 'success', 'error', 'warning', 'info'
+    type: "",
     title: "",
     message: "",
   });

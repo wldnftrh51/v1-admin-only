@@ -7,6 +7,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   return (
+    
     <div className="flex flex-col items-center justify-center min-h-screen w-full p-4 sm:p-8 bg-gray-50">
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-8 sm:mb-10 px-4">
         Welcome to Admin Dashboard TK AZIZAH 2

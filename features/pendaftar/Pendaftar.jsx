@@ -25,7 +25,7 @@ export default function HalamanPendaftar() {
 
   // State untuk pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // You can adjust this value
+  const itemsPerPage = 5; 
 
   // State untuk detail modal
   const [detailModal, setDetailModal] = useState({
@@ -36,7 +36,7 @@ export default function HalamanPendaftar() {
   // Enhanced notification state
   const [notification, setNotification] = useState({
     show: false,
-    type: "", // 'success', 'error', 'warning', 'info'
+    type: "", 
     title: "",
     message: "",
   });
