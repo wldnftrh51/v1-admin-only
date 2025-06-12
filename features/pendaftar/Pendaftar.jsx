@@ -340,10 +340,10 @@ export default function HalamanPendaftar() {
                 <p className="text-gray-800 mt-2 text-lg">
                   {item.tanggal_lahir
                     ? new Date(item.tanggal_lahir).toLocaleDateString("id-ID", {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                      })
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })
                     : "-"}
                 </p>
               </div>
@@ -434,13 +434,13 @@ export default function HalamanPendaftar() {
                   <p className="text-gray-800 mt-2 text-lg">
                     {item.ayah_tanggal_lahir
                       ? new Date(item.ayah_tanggal_lahir).toLocaleDateString(
-                          "id-ID",
-                          {
-                            day: "2-digit",
-                            month: "long",
-                            year: "numeric",
-                          }
-                        )
+                        "id-ID",
+                        {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                        }
+                      )
                       : "-"}
                   </p>
                 </div>
@@ -523,13 +523,13 @@ export default function HalamanPendaftar() {
                   <p className="text-gray-800 mt-2 text-lg">
                     {item.ibu_tanggal_lahir
                       ? new Date(item.ibu_tanggal_lahir).toLocaleDateString(
-                          "id-ID",
-                          {
-                            day: "2-digit",
-                            month: "long",
-                            year: "numeric",
-                          }
-                        )
+                        "id-ID",
+                        {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                        }
+                      )
                       : "-"}
                   </p>
                 </div>
@@ -686,9 +686,8 @@ export default function HalamanPendaftar() {
                               >
                                 <div className="flex items-center gap-3">
                                   <div
-                                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                                      isImage ? "bg-blue-100" : "bg-gray-100"
-                                    }`}
+                                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${isImage ? "bg-blue-100" : "bg-gray-100"
+                                      }`}
                                   >
                                     {isImage ? (
                                       <svg
@@ -855,7 +854,7 @@ export default function HalamanPendaftar() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 bg-gray-50">
+    <div className="flex flex-col items-center justify-center min-h-screen w-full p-2 md:p-8 bg-gray-50">
       {/* Enhanced Notification Popup */}
       <NotificationPopup />
 
@@ -925,7 +924,7 @@ export default function HalamanPendaftar() {
         </div>
       )}
 
-      <div className="flex-1 p-6 w-full">
+      <div className="flex flex-col flex-grow p-6 w-full">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
             Halaman Pendaftar
@@ -985,9 +984,8 @@ export default function HalamanPendaftar() {
                   currentData.map((item, index) => (
                     <tr
                       key={item.id_siswa}
-                      className={`hover:bg-blue-50 transition-colors ${
-                        index % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
-                      }`}
+                      className={`hover:bg-blue-50 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
+                        }`}
                     >
                       <td className="px-6 py-4 text-gray-800 font-medium">
                         {item.nama_lengkap}
@@ -998,13 +996,13 @@ export default function HalamanPendaftar() {
                       <td className="px-6 py-4 text-gray-600">
                         {item.tanggal_lahir
                           ? new Date(item.tanggal_lahir).toLocaleDateString(
-                              "id-ID",
-                              {
-                                day: "2-digit",
-                                month: "long",
-                                year: "numeric",
-                              }
-                            )
+                            "id-ID",
+                            {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                            }
+                          )
                           : "-"}
                       </td>
                       <td className="px-6 py-4 text-gray-600">
@@ -1061,31 +1059,27 @@ export default function HalamanPendaftar() {
           </div>
         </div>
 
-        <div className="w-full flex-row flex justify-between items-end mt-6">
-
+        <div className="pb-2 flex justify-between items-center w-full px-2 md:px-6 mt-6">
           {totalPages > 1 ? (
             <div className="flex items-center gap-2">
-              {/* Tombol Previous */}
               <button
                 onClick={goToPrevPage}
                 disabled={currentPage === 1}
-                className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 px-2 py-2 sm:px-3 sm:py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
 
-              {/* Indikator Halaman Saat Ini */}
-              <span className="px-3 py-2 border rounded-md font-medium">
+              <span className="px-2 py-1 sm:px-3 sm:py-2 border rounded-md font-medium text-sm sm:text-base">
                 {currentPage}
               </span>
 
-              {/* Tombol Next */}
               <button
                 onClick={goToNextPage}
                 disabled={currentPage === totalPages}
-                className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 px-2 py-2 sm:px-3 sm:py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ChevronRight size={16} />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           ) : (

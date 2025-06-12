@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
+  Plus,
 } from "lucide-react";
 
 export default function HalamanGuru() {
@@ -253,7 +254,7 @@ export default function HalamanGuru() {
         setDataGuru((prev) =>
           prev.map((guru) =>
             (guru.id || guru.id_guru) ===
-            (editingGuru.id || editingGuru.id_guru)
+              (editingGuru.id || editingGuru.id_guru)
               ? { ...guru, ...payload }
               : guru
           )
@@ -467,13 +468,15 @@ export default function HalamanGuru() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full p-8 pb-6 bg-gray-50">
+    <div className="flex flex-col min-h-screen w-full p-2 md:p-8 pb-0 bg-gray-50">
       {/* Enhanced Notification Popup (mengganti Toast) */}
       <NotificationPopup />
 
-      <div className="flex-1 p-6 w-full relative">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Halaman Guru</h1>
+      <div className="flex flex-col flex-grow p-6 w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
+            Halaman Guru
+          </h1>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
@@ -489,11 +492,12 @@ export default function HalamanGuru() {
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-md bg-white shadow mt-10 w-full">
-          <table className="w-full text-lg text-left">
+        <div className="overflow-x-auto rounded-lg bg-white shadow-lg mt-6">
+          {/* <div className="overflow-x-auto rounded-md bg-white shadow mt-10 w-full"> */}
+          <table className="w-full table-auto text-sm md:text-lg text-left">
             <thead className="bg-[#F3F6FD] text-gray-700">
               <tr>
-                <th className="px-6 py-4">Foto</th>
+                <th className="px-8 md:px-6 py-4">Foto</th>
                 <th
                   className="px-6 py-4 cursor-pointer"
                   onClick={() => {
@@ -537,9 +541,8 @@ export default function HalamanGuru() {
               {currentData.map((guru, i) => (
                 <tr
                   key={guru.id || guru.id_guru || i}
-                  className={`${
-                    i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
-                  } hover:bg-blue-50 cursor-pointer transition-colors`}
+                  className={`${i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
+                    } hover:bg-blue-50 cursor-pointer transition-colors`}
                   onClick={() => handleShowDetail(guru)}
                 >
                   <td className="px-6 py-4">
@@ -607,21 +610,21 @@ export default function HalamanGuru() {
             <button
               onClick={goToPrevPage}
               disabled={currentPage === 1}
-              className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 px-2 py-2 sm:px-3 sm:py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
 
-            <span className="px-3 py-2 border rounded-md hover:bg-gray-50">
+            <span className="px-2 py-1 sm:px-3 sm:py-2 border rounded-md font-medium text-sm sm:text-base">
               {currentPage}
             </span>
 
             <button
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 px-2 py-2 sm:px-3 sm:py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronRight size={16} />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         ) : (
@@ -638,14 +641,16 @@ export default function HalamanGuru() {
             <FaFileExcel />
           </button>
           <button
-            className="px-4 py-2 bg-btn text-white text-lg rounded"
+            className="flex items-center gap-2 px-4 py-2 bg-btn text-white rounded-lg text-sm md:text-lg transition-colors shadow-md hover:bg-green-700"
             onClick={() => {
               resetForm();
               setShowModal(true);
             }}
           >
+            <Plus className="w-4 h-4" />
             Tambahkan Guru
           </button>
+
         </div>
       </div>
 
@@ -763,8 +768,28 @@ export default function HalamanGuru() {
 
       {/* Modal Tambah/Edit Guru */}
       {showModal && (
-        <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-xl p-8 max-w-2xl w-full shadow-2xl mx-4">
+        <div
+          className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50"
+          onClick={() => {
+            setShowModal(false);
+            resetForm();
+          }}
+        >
+          <div
+            className="relative bg-white rounded-xl p-6 pb-10 max-w-2xl w-full shadow-2xl mx-4 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Tombol X untuk tutup modal */}
+            <button
+              className="absolute top-3 right-4 text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() => {
+                setShowModal(false);
+                resetForm();
+              }}
+            >
+              &times;
+            </button>
+
             <h3 className="text-2xl font-semibold mb-8 text-center text-gray-800">
               {isEditMode ? "Edit Guru" : "Tambah Guru Baru"}
             </h3>
@@ -897,8 +922,8 @@ export default function HalamanGuru() {
                     ? "Mengupdate..."
                     : "Menyimpan..."
                   : isEditMode
-                  ? "Update"
-                  : "Simpan"}
+                    ? "Update"
+                    : "Simpan"}
               </button>
             </div>
           </div>

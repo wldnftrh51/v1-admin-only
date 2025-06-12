@@ -130,8 +130,7 @@ export default function HalamanTestimoni() {
       showNotification(
         "success",
         "Status Diubah",
-        `Testimoni ${
-          toggledItem.tampilkan ? "ditampilkan" : "disembunyikan"
+        `Testimoni ${toggledItem.tampilkan ? "ditampilkan" : "disembunyikan"
         } di halaman publik`
       );
     } catch (error) {
@@ -319,7 +318,7 @@ export default function HalamanTestimoni() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen w-full p-8 pb-0 bg-gray-50">
+    <div className="flex flex-col min-h-screen w-full p-2 md:p-8 pb-0 bg-gray-50">
       {/* Enhanced Notification Popup */}
       <NotificationPopup />
 
@@ -371,11 +370,10 @@ export default function HalamanTestimoni() {
             <div className="flex justify-between items-center">
               <button
                 onClick={() => toggleTampilkan(selectedTestimoni.id_testimoni)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedTestimoni.tampilkan
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${selectedTestimoni.tampilkan
                     ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     : "bg-blue-100 text-green-700 hover:bg-blue-200"
-                }`}
+                  }`}
               >
                 {selectedTestimoni.tampilkan ? (
                   <>
@@ -563,9 +561,8 @@ export default function HalamanTestimoni() {
                 currentData.map((item, index) => (
                   <tr
                     key={item.id_testimoni}
-                    className={`hover:bg-blue-50 transition-colors ${
-                      index % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
-                    }`}
+                    className={`hover:bg-blue-50 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
+                      }`}
                   >
                     <td
                       className="px-6 py-4 text-gray-800 break-words font-medium hover:text-green-600 cursor-pointer"
@@ -573,11 +570,11 @@ export default function HalamanTestimoni() {
                     >
                       {item.nama}
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
+                    <td className="px-6 py-3 text-gray-600">
                       {item.no_telpon}
                     </td>
                     <td
-                      className="px-6 py-4 text-gray-700 break-words cursor-pointer hover:text-green-600"
+                      className="px-6 py-3 text-gray-700 break-words cursor-pointer hover:text-green-600"
                       onClick={() => handleShowDetail(item)}
                     >
                       <div className="max-w-xs overflow-hidden">
@@ -586,7 +583,7 @@ export default function HalamanTestimoni() {
                           : item.isi_pesan}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-3">
                       <button
                         onClick={() => toggleTampilkan(item.id_testimoni)}
                         className="flex items-center gap-2 text-sm md:text-base font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -632,39 +629,38 @@ export default function HalamanTestimoni() {
       </div>
 
       {/* Pagination dan Info */}
-      <div className="pb-2 flex justify-between items-center w-full px-6">
-        {/* Pagination di kiri */}
+      <div className="pb-2 flex justify-between items-center w-full px-6 mt-6">
         {totalPages > 1 ? (
           <div className="flex items-center gap-2">
             <button
               onClick={goToPrevPage}
               disabled={currentPage === 1}
-              className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 px-2 py-2 sm:px-3 sm:py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
 
-            <span className="px-3 py-2 border rounded-md font-medium">
+            <span className="px-2 py-1 sm:px-3 sm:py-2 border rounded-md font-medium text-sm sm:text-base">
               {currentPage}
             </span>
 
             <button
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 px-2 py-2 sm:px-3 sm:py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronRight size={16} />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         ) : (
           <div />
         )}
 
-        {/* Info pagination di kanan */}
-        <div className="flex items-center gap-4 text-sm text-gray-600">
-          {filteredTestimoni.length > 0 && <></>}
-        </div>
+      {/* Info pagination di kanan */}
+      <div className="flex items-center gap-4 text-sm text-gray-600">
+        {filteredTestimoni.length > 0 && <></>}
       </div>
     </div>
+    </div >
   );
 }

@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
+  Plus,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -501,7 +502,7 @@ export default function HalamanSiswa() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen w-full p-8 bg-gray-50">
+    <div className="flex flex-col min-h-screen w-full p-2 md:p-8 bg-gray-50">
       {/* Notification Popup */}
       <NotificationPopup />
       <div className="flex-grow">
@@ -529,7 +530,7 @@ export default function HalamanSiswa() {
             <thead className="bg-[#F3F6FD] text-gray-700">
               <tr>
                 <th
-                  className="px-6 py-4 cursor-pointer hover:bg-blue-50 transition-colors"
+                  className="px-6 py-4 cursor-pointer min-w-[120px] hover:bg-blue-50 transition-colors"
                   onClick={() => {
                     if (sortBy === "nama_lengkap") {
                       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -580,9 +581,8 @@ export default function HalamanSiswa() {
                 paginatedSiswa.map((siswa, i) => (
                   <tr
                     key={siswa.id_siswa || i}
-                    className={`${
-                      i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
-                    } hover:bg-blue-50 transition-colors`}
+                    className={`${i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
+                      } hover:bg-blue-50 transition-colors`}
                     onClick={() => handleShowDetail(siswa)}
                     title="Klik untuk melihat detail lengkap"
                   >
@@ -652,19 +652,21 @@ export default function HalamanSiswa() {
             <button
               onClick={goToPrevPage}
               disabled={currentPage === 1}
-              className="flex items-center gap-1 px-3 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 px-2 py-2 sm:px-3 sm:py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <span className="px-3 py-2 border rounded-md bg-blue-50 text-blue-700 font-medium">
-              {currentPage} / {totalPages}
+
+            <span className="px-2 py-1 sm:px-3 sm:py-2 border rounded-md font-medium text-sm sm:text-base">
+              {currentPage}
             </span>
+
             <button
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className="flex items-center gap-1 px-3 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 px-2 py-2 sm:px-3 sm:py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronRight size={16} />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         ) : (
@@ -681,12 +683,13 @@ export default function HalamanSiswa() {
             <FaFileExcel />
           </button>
           <button
-            className="px-4 py-2 bg-btn text-white text-lg rounded transition-colors shadow-md hover:shadow-lg"
+            className="flex items-center gap-2 px-4 py-2 bg-btn text-white rounded-lg text-sm md:text-lg transition-colors shadow-md hover:bg-green-700"
             onClick={() => {
               resetForm();
               setShowModal(true);
             }}
           >
+            <Plus className="w-4 h-4" />
             Tambahkan Siswa
           </button>
         </div>
@@ -835,11 +838,12 @@ export default function HalamanSiswa() {
 
       {/* MODAL */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-30 flex justify-center items-center px-4 pl-64">
+        <div className="fixed inset-0 bg-black/50 z-30 flex justify-center items-center px-2 md:px-4  md:pl-64">
           <div className="bg-white max-w-6xl w-full rounded-xl shadow-xl border border-gray-200 p-8 overflow-y-auto max-h-[90vh]">
             <h2 className="text-2xl font-semibold mb-6 text-center">
               {editMode ? "Edit Siswa" : "Tambah Siswa"}
             </h2>
+
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-700">
               <label className="block">
@@ -1030,9 +1034,9 @@ export default function HalamanSiswa() {
                   Foto Profil
                 </label>
                 <div className="flex flex-col gap-2">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-end gap-2">
                     <label className="flex-1">
-                      <span className="text-sm">Upload File</span>
+                      <span className="text-sm block mb-1">Upload File</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -1046,7 +1050,7 @@ export default function HalamanSiswa() {
                         className="w-full border border-gray-300 px-3 py-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </label>
-                    <span className="self-end pb-2 text-gray-500">atau</span>
+                    <span className="self-auto md:self-end pb-2 text-gray-500">atau</span>
                     <label className="flex-1">
                       <span className="text-sm">URL Gambar</span>
                       <input
@@ -1106,7 +1110,7 @@ export default function HalamanSiswa() {
               </div>
             </div>
 
-            <div className="mt-8 flex justify-end gap-4">
+            <div className="mt-8 flex flex-row sm:flex-row justify-center sm:justify-end gap-3 ">
               <button
                 className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded transition-colors shadow-md"
                 onClick={() => {
@@ -1134,6 +1138,7 @@ export default function HalamanSiswa() {
                 )}
               </button>
             </div>
+
           </div>
         </div>
       )}

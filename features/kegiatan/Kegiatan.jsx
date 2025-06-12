@@ -430,7 +430,7 @@ export default function HalamanKegiatan() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen w-full p-8 pb-0 bg-gray-50">
+    <div className="flex flex-col min-h-screen w-full p-2 md:p-8 pb-0 bg-gray-50">
       {/* Enhanced Notification Popup */}
       <NotificationPopup />
 
@@ -663,9 +663,8 @@ export default function HalamanKegiatan() {
                 currentData.map((kegiatan, i) => (
                   <tr
                     key={kegiatan.id_kegiatan}
-                    className={`hover:bg-blue-50 transition-colors ${
-                      i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
-                    }`}
+                    className={`hover:bg-blue-50 transition-colors ${i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
+                      }`}
                   >
                     <td
                       className="px-6 py-4 text-gray-800 break-words font-medium hover:text-green-600 cursor-pointer"
@@ -737,29 +736,28 @@ export default function HalamanKegiatan() {
             <button
               onClick={goToPrevPage}
               disabled={currentPage === 1}
-              className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700"
+              className="flex items-center gap-1 px-2 py-2 sm:px-3 sm:py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
 
-            <span className="px-3 py-2 border rounded-md hover:bg-gray-50">
+            <span className="px-2 py-1 sm:px-3 sm:py-2 border rounded-md font-medium text-sm sm:text-base">
               {currentPage}
             </span>
 
-            {/* Tombol Next */}
             <button
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700"
+              className="flex items-center gap-1 px-2 py-2 sm:px-3 sm:py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronRight size={16} />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         ) : (
           <div /> // Placeholder if no pagination is needed
         )}
         <button
-          className="flex items-center gap-2 px-4 py-2 bg-btn text-white rounded-lg text-lg transition-colors shadow-md hover:bg-blue-700"
+          className="flex items-center gap-2 px-4 py-2 bg-btn text-white rounded-lg text-sm md:text-lg transition-colors shadow-md hover:bg-blue-700"
           onClick={() => {
             setForm({
               judul: "",
