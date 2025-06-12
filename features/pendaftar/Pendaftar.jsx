@@ -146,7 +146,7 @@ export default function HalamanPendaftar() {
         `Data pendaftar ${pendaftar.nama_lengkap} telah dihapus`
       );
     } catch (err) {
-      showNotification("error", "Gagal Menghapus", err.message);
+      
     } finally {
       setConfirmDelete({ show: false, pendaftar: null, loading: false });
     }
@@ -1089,7 +1089,7 @@ export default function HalamanPendaftar() {
           <button
             onClick={downloadExcel}
             disabled={dataPendaftar.length === 0}
-            className="bg-btn text-white font-semibold py-3 px-6 rounded-lg shadow-lg text-sm md:text-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-btn text-white font-semibold py-3 px-6 rounded-lg shadow-lg text-sm md:text-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mb-6"
           >
             <Download size={18} />
             Unduh Excel
