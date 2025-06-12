@@ -3,7 +3,18 @@ import { useState, useEffect } from "react";
 import { FaFileExcel } from "react-icons/fa";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { Trash2 } from "lucide-react";
+import { FaEdit } from "react-icons/fa";
+import {
+  Trash2,
+  X,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Info,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 export default function HalamanGuru() {
   const [search, setSearch] = useState("");
@@ -13,8 +24,28 @@ export default function HalamanGuru() {
   const [dataGuru, setDataGuru] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Enhanced notification state (mengganti toast state)
+  const [notification, setNotification] = useState({
+    show: false,
+    type: "", // 'success', 'error', 'warning', 'info'
+    title: "",
+    message: "",
+  });
+
+  // State untuk pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
   const [guruToDelete, setGuruToDelete] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // State untuk detail guru
+  const [selectedGuru, setSelectedGuru] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+
+  // State untuk edit
+  const [editingGuru, setEditingGuru] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const [form, setForm] = useState({
     nama: "",
@@ -26,46 +57,107 @@ export default function HalamanGuru() {
     foto: null,
   });
 
+  // Function untuk menampilkan notifikasi (mengganti showToast)
+  const showNotification = (type, title, message) => {
+    setNotification({
+      show: true,
+      type,
+      title,
+      message,
+    });
+
+    // Auto hide setelah 4 detik
+    setTimeout(() => {
+      setNotification((prev) => ({ ...prev, show: false }));
+    }, 4000);
+  };
+
+  // Function untuk menutup notifikasi
+  const closeNotification = () => {
+    setNotification((prev) => ({ ...prev, show: false }));
+  };
+
   const fetchDataGuru = () => {
     fetch("/api/guru")
       .then((res) => res.json())
-      .then((data) => setDataGuru(data))
-      .catch((err) => console.error("Failed to fetch guru:", err));
+      .then((data) => {
+        setDataGuru(data);
+        showNotification("success", "Berhasil", "Data guru berhasil dimuat");
+      })
+      .catch((err) => {
+        console.error("Failed to fetch guru:", err);
+        showNotification("error", "Gagal Memuat", "Gagal memuat data guru");
+      });
   };
 
   useEffect(() => {
     fetchDataGuru();
   }, []);
 
+  // Reset ke halaman 1 ketika search berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  // Function untuk menampilkan detail guru
+  const handleShowDetail = (guru) => {
+    setSelectedGuru(guru);
+    setShowDetailModal(true);
+  };
+
   const handleExportExcel = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Guru");
-    worksheet.addRow([
-      "Nama",
-      "Jabatan",
-      "NIP",
-      "Tempat Lahir",
-      "Tanggal Lahir",
-      "Jenis Kelamin",
-    ]);
-
-    filteredGuru.slice(0, 6).forEach((guru) => {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Guru");
       worksheet.addRow([
-        guru.nama,
-        guru.jabatan,
-        guru.nip,
-        guru.tempat,
-        guru.tanggal_lahir,
-        guru.jenis_kelamin,
+        "Nama",
+        "Jabatan",
+        "NIP",
+        "Tempat Lahir",
+        "Tanggal Lahir",
+        "Jenis Kelamin",
       ]);
-    });
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
+      // Export semua data yang terfilter, bukan hanya halaman saat ini
+      filteredGuru.forEach((guru) => {
+        worksheet.addRow([
+          guru.nama,
+          guru.jabatan,
+          guru.nip,
+          guru.tempat,
+          guru.tanggal_lahir,
+          guru.jenis_kelamin,
+        ]);
+      });
 
-    saveAs(blob, "data-guru.xlsx");
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      saveAs(blob, "data-guru.xlsx");
+      showNotification(
+        "success",
+        "Berhasil",
+        "Data berhasil diekspor ke Excel"
+      );
+    } catch (error) {
+      showNotification("error", "Gagal Export", "Gagal mengekspor data");
+    }
+  };
+
+  const resetForm = () => {
+    setForm({
+      nama: "",
+      jabatan: "",
+      nip: "",
+      tempatLahir: "",
+      tanggalLahir: "",
+      jenisKelamin: "",
+      foto: null,
+    });
+    setEditingGuru(null);
+    setIsEditMode(false);
   };
 
   const handleSubmit = async () => {
@@ -77,14 +169,18 @@ export default function HalamanGuru() {
       !form.tanggalLahir ||
       !form.jenisKelamin
     ) {
-      alert("Mohon isi semua kolom!");
+      showNotification(
+        "warning",
+        "Peringatan",
+        "Mohon isi semua kolom yang wajib diisi!"
+      );
       return;
     }
 
     setLoading(true);
-    let fotoURL = null;
+    let fotoURL = editingGuru?.foto || null;
 
-    // Upload foto jika ada
+    // Upload foto jika ada foto baru
     if (form.foto) {
       try {
         const formData = new FormData();
@@ -102,13 +198,16 @@ export default function HalamanGuru() {
         const uploadResult = await uploadRes.json();
         fotoURL = uploadResult.url;
       } catch (err) {
-        alert("Gagal mengunggah foto: " + err.message);
+        showNotification(
+          "error",
+          "Error Upload",
+          "Gagal mengunggah foto: " + err.message
+        );
         setLoading(false);
         return;
       }
     }
 
-    // Insert data guru
     const payload = {
       nama: form.nama,
       jabatan: form.jabatan,
@@ -120,35 +219,73 @@ export default function HalamanGuru() {
     };
 
     try {
-      const res = await fetch("/api/guru", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        throw new Error("Gagal menambahkan guru");
+      let res;
+      if (isEditMode && editingGuru) {
+        // Update guru
+        res = await fetch(
+          `/api/guru?id=${editingGuru.id || editingGuru.id_guru}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
+      } else {
+        // Tambah guru baru
+        res = await fetch("/api/guru", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
       }
 
-      const newGuru = await res.json();
+      if (!res.ok) {
+        throw new Error(
+          isEditMode ? "Gagal mengupdate guru" : "Gagal menambahkan guru"
+        );
+      }
 
-      setDataGuru((prev) => [newGuru, ...prev]);
-      setForm({
-        nama: "",
-        jabatan: "",
-        nip: "",
-        tempatLahir: "",
-        tanggalLahir: "",
-        jenisKelamin: "",
-        foto: null,
-      });
+      const result = await res.json();
+
+      if (isEditMode) {
+        // Update data di state
+        setDataGuru((prev) =>
+          prev.map((guru) =>
+            (guru.id || guru.id_guru) ===
+            (editingGuru.id || editingGuru.id_guru)
+              ? { ...guru, ...payload }
+              : guru
+          )
+        );
+        showNotification("success", "Berhasil", "Data guru berhasil diupdate!");
+      } else {
+        // Tambah data baru ke state
+        setDataGuru((prev) => [result, ...prev]);
+        showNotification("success", "Berhasil", "Guru berhasil ditambahkan!");
+      }
+
+      resetForm();
       setShowModal(false);
-      alert("Guru berhasil ditambahkan!");
     } catch (err) {
-      alert(err.message || "Terjadi kesalahan");
+      showNotification("error", "Error", err.message || "Terjadi kesalahan");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEdit = (guru) => {
+    setEditingGuru(guru);
+    setIsEditMode(true);
+    setForm({
+      nama: guru.nama,
+      jabatan: guru.jabatan,
+      nip: guru.nip,
+      tempatLahir: guru.tempat,
+      tanggalLahir: guru.tanggal_lahir,
+      jenisKelamin: guru.jenis_kelamin,
+      foto: null, // Reset foto, akan menggunakan foto lama jika tidak diubah
+    });
+    setShowModal(true);
   };
 
   const confirmDeleteGuru = (guru) => {
@@ -167,10 +304,21 @@ export default function HalamanGuru() {
         }
       );
       if (!res.ok) throw new Error("Gagal menghapus guru");
-      alert("Guru berhasil dihapus");
+
+      showNotification("success", "Berhasil", "Guru berhasil dihapus");
       fetchDataGuru();
+
+      // Adjust current page if needed after deletion
+      const newTotalPages = Math.ceil((filteredGuru.length - 1) / itemsPerPage);
+      if (currentPage > newTotalPages && newTotalPages > 0) {
+        setCurrentPage(newTotalPages);
+      }
     } catch (error) {
-      alert(error.message || "Terjadi kesalahan saat menghapus guru");
+      showNotification(
+        "error",
+        "Error",
+        error.message || "Terjadi kesalahan saat menghapus guru"
+      );
     } finally {
       setShowDeleteModal(false);
       setGuruToDelete(null);
@@ -198,9 +346,121 @@ export default function HalamanGuru() {
     );
   });
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredGuru.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = filteredGuru.slice(startIndex, endIndex);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const formatTanggal = (tanggal) => {
+    const date = new Date(tanggal);
+    return date.toLocaleDateString("id-ID", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const hitungUmur = (tanggalLahir) => {
+    const today = new Date();
+    const birthDate = new Date(tanggalLahir);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
+  // Enhanced Notification Component (mengganti Toast Component)
+  const NotificationPopup = () => {
+    if (!notification.show) return null;
+
+    const getIcon = () => {
+      switch (notification.type) {
+        case "success":
+          return <CheckCircle className="w-6 h-6 text-green-500" />;
+        case "error":
+          return <XCircle className="w-6 h-6 text-red-500" />;
+        case "warning":
+          return <AlertTriangle className="w-6 h-6 text-yellow-500" />;
+        case "info":
+          return <Info className="w-6 h-6 text-blue-500" />;
+        default:
+          return <AlertTriangle className="w-6 h-6 text-blue-500" />;
+      }
+    };
+
+    const getBgColor = () => {
+      switch (notification.type) {
+        case "success":
+          return "bg-green-50 border-green-200";
+        case "error":
+          return "bg-red-50 border-red-200";
+        case "warning":
+          return "bg-yellow-50 border-yellow-200";
+        case "info":
+          return "bg-blue-50 border-blue-200";
+        default:
+          return "bg-blue-50 border-blue-200";
+      }
+    };
+
+    return (
+      <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-right-2">
+        <div
+          className={`${getBgColor()} border rounded-lg shadow-lg p-4 max-w-sm`}
+        >
+          <div className="flex items-start gap-3">
+            {getIcon()}
+            <div className="flex-1">
+              <h4 className="font-medium text-gray-900">
+                {notification.title}
+              </h4>
+              <p className="text-sm text-gray-600 mt-1">
+                {notification.message}
+              </p>
+            </div>
+            <button
+              onClick={closeNotification}
+              className="text-gray-400 hover:text-gray-600 ml-2"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full p-8 bg-gray-50">
-      <div className="flex-1 p-6 bg-[#F5F6FA] min-h-screen w-full relative">
+    <div className="flex flex-col items-center justify-center w-full p-8 pb-6 bg-gray-50">
+      {/* Enhanced Notification Popup (mengganti Toast) */}
+      <NotificationPopup />
+
+      <div className="flex-1 p-6 w-full relative">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Halaman Guru</h1>
         </div>
@@ -211,7 +471,7 @@ export default function HalamanGuru() {
             placeholder="Cari berdasarkan nama atau jabatan"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-4 py-2 text-lg border rounded-md w-full sm:w-100 shadow-sm bg-white"
+            className="px-4 py-2 text-lg border border-gray-300 rounded-md w-full sm:w-100 shadow-sm bg-white"
           />
         </div>
 
@@ -260,10 +520,13 @@ export default function HalamanGuru() {
               </tr>
             </thead>
             <tbody>
-              {filteredGuru.slice(0, 6).map((guru, i) => (
+              {currentData.map((guru, i) => (
                 <tr
                   key={guru.id || guru.id_guru || i}
-                  className={i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"}
+                  className={`${
+                    i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
+                  } hover:bg-blue-50 cursor-pointer transition-colors`}
+                  onClick={() => handleShowDetail(guru)}
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -288,24 +551,71 @@ export default function HalamanGuru() {
                   <td className="px-6 py-4">{guru.jabatan}</td>
                   <td className="px-6 py-4">{guru.nip}</td>
                   <td className="px-6 py-4">{guru.tempat}</td>
-                  <td className="px-6 py-4">{guru.tanggal_lahir}</td>
+                  <td className="px-6 py-4">
+                    {new Date(guru.tanggal_lahir).toISOString().slice(0, 10)}
+                  </td>
                   <td className="px-6 py-4">{guru.jenis_kelamin}</td>
                   <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => confirmDeleteGuru(guru)}
-                      className="text-red-600 hover:text-red-800"
-                      title="Hapus data"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(guru);
+                        }}
+                        className="text-green-600 hover:text-green-800"
+                        title="Edit data"
+                      >
+                        <FaEdit size={18} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          confirmDeleteGuru(guru);
+                        }}
+                        className="text-red-600 hover:text-red-800"
+                        title="Hapus data"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      </div>
 
-        <div className="mt-4 flex justify-end gap-2">
+      <div className="mt-6 flex justify-between items-center w-full px-6">
+        {/* Pagination di kiri */}
+        {totalPages > 1 ? (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={goToPrevPage}
+              disabled={currentPage === 1}
+              className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            <span className="px-3 py-2 border rounded-md hover:bg-gray-50">
+              {currentPage}
+            </span>
+
+            <button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        ) : (
+          <div />
+        )}
+
+        {/* Tombol Ekspor + Tambahkan Guru di kanan */}
+        <div className="flex items-center gap-2">
           <button
             className="text-green-600 text-2xl hover:text-green-800"
             onClick={handleExportExcel}
@@ -315,19 +625,134 @@ export default function HalamanGuru() {
           </button>
           <button
             className="px-4 py-2 bg-btn text-white text-lg rounded"
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              resetForm();
+              setShowModal(true);
+            }}
           >
             Tambahkan Guru
           </button>
         </div>
       </div>
 
-      {/* Modal Tambah Guru */}
+      {/* Modal Detail Guru */}
+      {showDetailModal && selectedGuru && (
+        <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-xl p-8 max-w-2xl w-full shadow-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">Detail Guru</h3>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="flex flex-col items-center mb-8">
+              <img
+                src={
+                  selectedGuru.foto ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    selectedGuru.nama
+                  )}&background=0D8ABC&color=fff&size=150`
+                }
+                alt={selectedGuru.nama}
+                className="w-32 h-32 rounded-full object-cover mb-4 shadow-lg"
+                onError={(e) => {
+                  e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    selectedGuru.nama
+                  )}&background=0D8ABC&color=fff&size=150`;
+                }}
+              />
+              <h4 className="text-xl font-semibold text-gray-800">
+                {selectedGuru.nama}
+              </h4>
+              <p className="text-gray-600">{selectedGuru.jabatan}</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h5 className="font-semibold text-gray-700 mb-2">
+                  Informasi Personal
+                </h5>
+                <div className="space-y-3">
+                  <div>
+                    <span className="text-sm text-gray-500">Nama Lengkap:</span>
+                    <p className="font-medium">{selectedGuru.nama}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">
+                      Jenis Kelamin:
+                    </span>
+                    <p className="font-medium">{selectedGuru.jenis_kelamin}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">Tempat Lahir:</span>
+                    <p className="font-medium">{selectedGuru.tempat}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">
+                      Tanggal Lahir:
+                    </span>
+                    <p className="font-medium">
+                      {formatTanggal(selectedGuru.tanggal_lahir)}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">Umur:</span>
+                    <p className="font-medium">
+                      {hitungUmur(selectedGuru.tanggal_lahir)} tahun
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h5 className="font-semibold text-gray-700 mb-2">
+                  Informasi Kepegawaian
+                </h5>
+                <div className="space-y-3">
+                  <div>
+                    <span className="text-sm text-gray-500">Jabatan:</span>
+                    <p className="font-medium">{selectedGuru.jabatan}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">NIP:</span>
+                    <p className="font-medium">{selectedGuru.nip}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 flex justify-center gap-4">
+              <button
+                onClick={() => {
+                  setShowDetailModal(false);
+                  handleEdit(selectedGuru);
+                }}
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+              >
+                <FaEdit size={16} />
+                Edit Data
+              </button>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Tambah/Edit Guru */}
       {showModal && (
-        <div className="fixed inset-0  bg-opacity-40 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-xl p-8 max-w-2xl w-full shadow-2xl mx-4">
             <h3 className="text-2xl font-semibold mb-8 text-center text-gray-800">
-              Tambah Guru Baru
+              {isEditMode ? "Edit Guru" : "Tambah Guru Baru"}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -395,6 +820,19 @@ export default function HalamanGuru() {
               <label className="text-sm font-medium block mb-2">
                 Foto Profil (Opsional)
               </label>
+
+              {/* Tampilkan foto lama jika dalam mode edit */}
+              {isEditMode && editingGuru?.foto && !form.foto && (
+                <div className="mb-3">
+                  <p className="text-sm text-gray-600 mb-2">Foto saat ini:</p>
+                  <img
+                    src={editingGuru.foto}
+                    alt="Foto saat ini"
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                </div>
+              )}
+
               <input
                 type="file"
                 accept="image/*"
@@ -428,15 +866,7 @@ export default function HalamanGuru() {
               <button
                 onClick={() => {
                   setShowModal(false);
-                  setForm({
-                    nama: "",
-                    jabatan: "",
-                    nip: "",
-                    tempatLahir: "",
-                    tanggalLahir: "",
-                    jenisKelamin: "",
-                    foto: null,
-                  });
+                  resetForm();
                 }}
                 className="px-6 py-2 bg-gray-300 rounded hover:bg-gray-400"
                 disabled={loading}
@@ -448,7 +878,13 @@ export default function HalamanGuru() {
                 className="px-6 py-2 bg-green-800 text-white rounded hover:bg-green-600 disabled:bg-green-400"
                 disabled={loading}
               >
-                {loading ? "Menyimpan..." : "Simpan"}
+                {loading
+                  ? isEditMode
+                    ? "Mengupdate..."
+                    : "Menyimpan..."
+                  : isEditMode
+                  ? "Update"
+                  : "Simpan"}
               </button>
             </div>
           </div>
@@ -457,7 +893,7 @@ export default function HalamanGuru() {
 
       {/* Modal Konfirmasi Hapus */}
       {showDeleteModal && (
-        <div className="fixed inset-0  bg-opacity-40 flex justify-center items-center z-50">
+        <div className="fixed inset-0  bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-md p-6 max-w-sm w-full shadow-lg mx-4">
             <h3 className="text-xl font-semibold mb-4 text-center text-red-600">
               Konfirmasi Hapus
