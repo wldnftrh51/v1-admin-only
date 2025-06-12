@@ -397,7 +397,7 @@ export default function HalamanDaftarPengguna() {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitLoading}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors font-medium flex items-center gap-2"
+                  className="px-6 py-2 bg-btn text-white rounded-lg disabled:opacity-50 transition-colors font-medium flex items-center gap-2"
                 >
                   {submitLoading ? (
                     <>

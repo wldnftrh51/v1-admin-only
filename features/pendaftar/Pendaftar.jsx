@@ -11,6 +11,8 @@ import {
   XCircle,
   AlertTriangle,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   X,
 } from "lucide-react";
 import * as XLSX from "xlsx";
@@ -18,9 +20,12 @@ import * as XLSX from "xlsx";
 export default function HalamanPendaftar() {
   const [search, setSearch] = useState("");
   const [dataPendaftar, setDataPendaftar] = useState([]);
-  const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // State untuk pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // You can adjust this value
 
   // State untuk detail modal
   const [detailModal, setDetailModal] = useState({
@@ -52,7 +57,7 @@ export default function HalamanPendaftar() {
       message,
     });
 
-    // Auto hide setelah 4 detik
+    // Auto hide after 4 seconds
     setTimeout(() => {
       setNotification((prev) => ({ ...prev, show: false }));
     }, 4000);
@@ -233,6 +238,37 @@ export default function HalamanPendaftar() {
     );
   };
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = filteredData.slice(startIndex, endIndex);
+
+  const goToNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const goToPrevPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Reset currentPage to 1 when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  // Adjust current page if needed after data changes (e.g., deletion)
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    } else if (totalPages === 0) {
+      setCurrentPage(1); // Reset to 1 if no data
+    }
+  }, [dataPendaftar, totalPages, currentPage]);
   // Detail Modal Component
   const DetailModal = () => {
     if (!detailModal.show || !detailModal.pendaftar) return null;
@@ -611,11 +647,13 @@ export default function HalamanPendaftar() {
                       }
                     }
 
-                    filePaths = filePaths.filter(path => {
-  const cleanPath = String(path).trim();
-  return cleanPath.length > 0 && !cleanPath.match(/^[\[\]"'\s]*$/);
-});
-
+                    filePaths = filePaths.filter((path) => {
+                      const cleanPath = String(path).trim();
+                      return (
+                        cleanPath.length > 0 &&
+                        !cleanPath.match(/^[\[\]"'\s]*$/)
+                      );
+                    });
 
                     if (filePaths.length > 0) {
                       return (
@@ -696,40 +734,6 @@ export default function HalamanPendaftar() {
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                  {isImage && (
-                                    <button
-                                      onClick={() => {
-                                        const imgModal =
-                                          document.createElement("div");
-                                        imgModal.className =
-                                          "fixed inset-0 bg-black/80 flex items-center justify-center z-[60] p-4";
-                                        imgModal.innerHTML = `
-                              <div class="relative max-w-4xl max-h-full">
-                                <button class="absolute -top-10 right-0 text-white hover:text-gray-300 text-xl font-bold">&times;</button>
-                                <img src="${cleanFilePath}" alt="Preview" class="max-w-full max-h-full object-contain rounded-lg" />
-                              </div>
-                            `;
-                                        document.body.appendChild(imgModal);
-                                        imgModal.addEventListener(
-                                          "click",
-                                          (e) => {
-                                            if (
-                                              e.target === imgModal ||
-                                              e.target.textContent === "×"
-                                            ) {
-                                              document.body.removeChild(
-                                                imgModal
-                                              );
-                                            }
-                                          }
-                                        );
-                                      }}
-                                      className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
-                                    >
-                                      Preview
-                                    </button>
-                                  )}
-
                                   <a
                                     href={cleanFilePath}
                                     target="_blank"
@@ -928,136 +932,170 @@ export default function HalamanPendaftar() {
           </h1>
         </div>
 
-        {/* Enhanced Search Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Cari berdasarkan nama..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-4 py-2 text-sm md:text-lg border border-gray-300 rounded-lg w-full sm:w-80 shadow-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            />
+        <div className="flex-grow">
+          {/* Enhanced Search Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Cari berdasarkan nama..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 pr-4 py-2 text-sm md:text-lg border border-gray-300 rounded-lg w-full sm:w-80 shadow-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              />
+            </div>
+
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="text-sm text-gray-500 hover:text-gray-700 px-2"
+              >
+                Clear
+              </button>
+            )}
           </div>
 
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              className="text-sm text-gray-500 hover:text-gray-700 px-2"
-            >
-              Clear
-            </button>
-          )}
-        </div>
-
-        <div className="overflow-x-auto rounded-lg bg-white shadow-lg mt-6">
-          <table className="w-full table-auto text-sm md:text-lg text-left">
-            <thead className="bg-[#F3F6FD] text-gray-700">
-              <tr>
-                <th className="px-6 py-4 font-semibold min-w-[150px]">Nama</th>
-                <th className="px-6 py-4 font-semibold min-w-[120px]">
-                  Tempat Lahir
-                </th>
-                <th className="px-6 py-4 font-semibold min-w-[150px]">
-                  Tanggal Lahir
-                </th>
-                <th className="px-6 py-4 font-semibold min-w-[120px]">
-                  Jenis Kelamin
-                </th>
-                <th className="px-6 py-4 font-semibold min-w-[100px]">Agama</th>
-                <th className="px-6 py-4 font-semibold min-w-[120px]">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.length > 0 ? (
-                filteredData.map((item, index) => (
-                  <tr
-                    key={item.id_siswa}
-                    className={`hover:bg-blue-50 transition-colors ${
-                      index % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
-                    }`}
-                  >
-                    <td className="px-6 py-4 text-gray-800 font-medium">
-                      {item.nama_lengkap}
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">
-                      {item.tempat_lahir}
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">
-                      {item.tanggal_lahir
-                        ? new Date(item.tanggal_lahir).toLocaleDateString(
-                            "id-ID",
-                            {
-                              day: "2-digit",
-                              month: "long",
-                              year: "numeric",
-                            }
-                          )
-                        : "-"}
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">
-                      {item.jenis_kelamin}
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">{item.agama}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => showDeleteConfirmation(item)}
-                          className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
-                          title="Hapus data"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                        <button
-                          onClick={() => showDetailModal(item)}
-                          className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
-                          title="Lihat detail"
-                        >
-                          <span className="flex items-center gap-1">
-                            <Eye size={16} />
-                            Detail
-                          </span>
-                        </button>
+          <div className="overflow-x-auto rounded-lg bg-white shadow-lg mt-6">
+            <table className="w-full table-auto text-sm md:text-lg text-left">
+              <thead className="bg-[#F3F6FD] text-gray-700">
+                <tr>
+                  <th className="px-6 py-4 font-semibold min-w-[150px]">
+                    Nama
+                  </th>
+                  <th className="px-6 py-4 font-semibold min-w-[120px]">
+                    Tempat Lahir
+                  </th>
+                  <th className="px-6 py-4 font-semibold min-w-[150px]">
+                    Tanggal Lahir
+                  </th>
+                  <th className="px-6 py-4 font-semibold min-w-[120px]">
+                    Jenis Kelamin
+                  </th>
+                  <th className="px-6 py-4 font-semibold min-w-[100px]">
+                    Agama
+                  </th>
+                  <th className="px-6 py-4 font-semibold min-w-[120px]">
+                    Aksi
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentData.length > 0 ? (
+                  currentData.map((item, index) => (
+                    <tr
+                      key={item.id_siswa}
+                      className={`hover:bg-blue-50 transition-colors ${
+                        index % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
+                      }`}
+                    >
+                      <td className="px-6 py-4 text-gray-800 font-medium">
+                        {item.nama_lengkap}
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {item.tempat_lahir}
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {item.tanggal_lahir
+                          ? new Date(item.tanggal_lahir).toLocaleDateString(
+                              "id-ID",
+                              {
+                                day: "2-digit",
+                                month: "long",
+                                year: "numeric",
+                              }
+                            )
+                          : "-"}
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {item.jenis_kelamin}
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">{item.agama}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => showDeleteConfirmation(item)}
+                            className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                            title="Hapus data"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                          <button
+                            onClick={() => showDetailModal(item)}
+                            className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
+                            title="Lihat detail"
+                          >
+                            <span className="flex items-center gap-1">
+                              <Eye size={16} />
+                              Detail
+                            </span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="6"
+                      className="px-6 py-12 text-center text-gray-500"
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <Users className="w-12 h-12 text-gray-300" />
+                        <p className="text-lg font-medium">
+                          {search
+                            ? "Tidak ada data yang sesuai dengan pencarian"
+                            : "Belum ada data pendaftar"}
+                        </p>
+                        <p className="text-sm">
+                          {search
+                            ? `Coba ubah kata kunci pencarian "${search}"`
+                            : "Data pendaftar akan muncul di sini"}
+                        </p>
                       </div>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="px-6 py-12 text-center text-gray-500"
-                  >
-                    <div className="flex flex-col items-center gap-2">
-                      <Users className="w-12 h-12 text-gray-300" />
-                      <p className="text-lg font-medium">
-                        {search
-                          ? "Tidak ada data yang sesuai dengan pencarian"
-                          : "Belum ada data pendaftar"}
-                      </p>
-                      <p className="text-sm">
-                        {search
-                          ? `Coba ubah kata kunci pencarian "${search}"`
-                          : "Data pendaftar akan muncul di sini"}
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div className="flex justify-between items-center mt-6">
-          <div className="text-sm text-gray-600">
-            Menampilkan {filteredData.length} dari {dataPendaftar.length} data
-            pendaftar
-          </div>
+        <div className="w-full flex-row flex justify-between items-end mt-6">
+
+          {totalPages > 1 ? (
+            <div className="flex items-center gap-2">
+              {/* Tombol Previous */}
+              <button
+                onClick={goToPrevPage}
+                disabled={currentPage === 1}
+                className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft size={16} />
+              </button>
+
+              {/* Indikator Halaman Saat Ini */}
+              <span className="px-3 py-2 border rounded-md font-medium">
+                {currentPage}
+              </span>
+
+              {/* Tombol Next */}
+              <button
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          ) : (
+            <div />
+          )}
+
           <button
             onClick={downloadExcel}
             disabled={dataPendaftar.length === 0}
-            className="bg-green-800 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg text-sm md:text-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-btn text-white font-semibold py-3 px-6 rounded-lg shadow-lg text-sm md:text-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Download size={18} />
             Unduh Excel

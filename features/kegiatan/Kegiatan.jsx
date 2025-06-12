@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import {FaEdit } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import {
   Trash2,
   CheckCircle,
@@ -11,6 +11,8 @@ import {
   FileText,
   Image,
   Search,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 export default function HalamanKegiatan() {
@@ -22,6 +24,9 @@ export default function HalamanKegiatan() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("tanggal");
   const [sortOrder, setSortOrder] = useState("desc");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Jumlah item per halaman
 
   // Enhanced notification state
   const [notification, setNotification] = useState({
@@ -234,7 +239,7 @@ export default function HalamanKegiatan() {
   };
 
   const handleEdit = (index) => {
-    const kegiatan = dataKegiatan[index];
+    const kegiatan = filteredKegiatan[index]; // Ambil dari filteredKegiatan karena index berlaku untuk halaman saat ini
     setForm({
       judul: kegiatan.judul,
       tanggal: formatDateForInput(kegiatan.tanggal),
@@ -242,7 +247,10 @@ export default function HalamanKegiatan() {
       foto: null,
       fotoURL: kegiatan.foto || "",
     });
-    setEditIndex(index);
+    // Kita perlu menemukan index asli di dataKegiatan jika ingin mengedit berdasarkan index global
+    // Atau bisa langsung menggunakan id_kegiatan untuk update API
+    const globalIndex = dataKegiatan.findIndex(item => item.id_kegiatan === kegiatan.id_kegiatan);
+    setEditIndex(globalIndex);
     setShowModal(true);
   };
 
@@ -275,6 +283,10 @@ export default function HalamanKegiatan() {
         "Berhasil Dihapus",
         `Kegiatan "${judul}" telah dihapus`
       );
+      // Optional: If current page becomes empty after deletion, go to previous page
+      if (currentData.length === 1 && currentPage > 1) {
+        setCurrentPage(prev => prev - 1);
+      }
     } catch (error) {
       console.error("Error deleting kegiatan:", error);
       showNotification(
@@ -321,6 +333,40 @@ export default function HalamanKegiatan() {
       item.judul.toLowerCase().includes(search.toLowerCase()) ||
       item.deskripsi.toLowerCase().includes(search.toLowerCase())
   );
+
+  // *** PAGINATION LOGIC START ***
+  // Total halaman berdasarkan data yang sudah difilter
+  const totalPages = Math.ceil(filteredKegiatan.length / itemsPerPage);
+
+  // Index awal dan akhir untuk slice data
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+
+  // Data yang ditampilkan di halaman saat ini
+  const currentData = filteredKegiatan.slice(startIndex, endIndex);
+
+  // Efek samping untuk mereset currentPage saat search atau sort berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortBy, sortOrder]);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+  // *** PAGINATION LOGIC END ***
+
 
   // Enhanced Notification Component
   const NotificationPopup = () => {
@@ -384,7 +430,7 @@ export default function HalamanKegiatan() {
   };
 
   return (
-    <div className="items-center justify-center min-h-screen w-full p-8 pb-0 bg-gray-50">
+    <div className="flex flex-col min-h-screen w-full p-8 pb-0 bg-gray-50">
       {/* Enhanced Notification Popup */}
       <NotificationPopup />
 
@@ -525,166 +571,195 @@ export default function HalamanKegiatan() {
           </div>
         </div>
       )}
-
-      <div className="flex flex-col p-6 sm:flex-row justify-between items-center gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
-          Halaman Kegiatan
-        </h1>
-      </div>
-
-      <div className="flex flex-col pl-6 sm:flex-row sm:items-center gap-2 mb-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
-            type="text"
-            placeholder="Cari kegiatan..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 pr-4 py-2 text-sm md:text-lg border border-gray-300 rounded-lg w-full sm:w-80 shadow-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-          />
+      <div className="flex-grow">
+        <div className="flex flex-col p-6 sm:flex-row justify-between items-center gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left w-full sm:w-auto">
+            Halaman Kegiatan
+          </h1>
         </div>
-      </div>
 
-      <div className="overflow-x-auto rounded-lg ml-6 bg-white shadow-lg mt-6">
-        <table className="w-full table-auto text-sm md:text-lg text-left">
-          <thead className="bg-[#F3F6FD] text-gray-700">
-            <tr>
-              <th
-                className="px-6 py-4 cursor-pointer min-w-[150px] hover:bg-blue-50 transition-colors"
-                onClick={() => {
-                  if (sortBy === "judul") {
-                    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-                  } else {
-                    setSortBy("judul");
-                    setSortOrder("asc");
-                  }
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  Judul{" "}
-                  {sortBy === "judul" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
-                </div>
-              </th>
-              <th
-                className="px-6 py-4 cursor-pointer min-w-[120px] hover:bg-blue-50 transition-colors"
-                onClick={() => {
-                  if (sortBy === "tanggal") {
-                    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-                  } else {
-                    setSortBy("tanggal");
-                    setSortOrder("desc");
-                  }
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  Tanggal{" "}
-                  {sortBy === "tanggal"
-                    ? sortOrder === "asc"
-                      ? "↑"
-                      : "↓"
-                    : ""}
-                </div>
-              </th>
-              <th className="px-6 py-4 min-w-[200px]">Deskripsi</th>
-              <th className="px-6 py-4 min-w-[100px]">Foto</th>
-              <th className="px-6 py-4 min-w-[80px]">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredKegiatan.length === 0 ? (
+        <div className="flex flex-col pl-6 sm:flex-row sm:items-center gap-2 mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Cari kegiatan..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 pr-4 py-2 text-sm md:text-lg border border-gray-300 rounded-lg w-full sm:w-80 shadow-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            />
+          </div>
+        </div>
+
+        <div className="overflow-x-auto rounded-lg ml-6 bg-white shadow-lg mt-6">
+          <table className="w-full table-auto text-sm md:text-lg text-left">
+            <thead className="bg-[#F3F6FD] text-gray-700">
               <tr>
-                <td
-                  colSpan="5"
-                  className="px-6 py-12 text-center text-gray-500"
+                <th
+                  className="px-6 py-4 cursor-pointer min-w-[150px] hover:bg-blue-50 transition-colors"
+                  onClick={() => {
+                    if (sortBy === "judul") {
+                      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                    } else {
+                      setSortBy("judul");
+                      setSortOrder("asc");
+                    }
+                  }}
                 >
-                  <div className="flex flex-col items-center gap-2">
-                    <Calendar className="w-12 h-12 text-gray-300" />
-                    <p className="text-lg font-medium">
-                      {dataKegiatan.length === 0
-                        ? "Belum ada data kegiatan"
-                        : "Tidak ada data yang sesuai pencarian"}
-                    </p>
-                    <p className="text-sm">
-                      {dataKegiatan.length === 0
-                        ? "Kegiatan yang ditambahkan akan muncul di sini"
-                        : "Coba ubah kata kunci pencarian Anda"}
-                    </p>
+                  <div className="flex items-center gap-2">
+                    Judul{" "}
+                    {sortBy === "judul" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
                   </div>
-                </td>
-              </tr>
-            ) : (
-              filteredKegiatan.map((kegiatan, i) => (
-                <tr
-                  key={kegiatan.id_kegiatan}
-                  className={`hover:bg-blue-50 transition-colors ${
-                    i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
-                  }`}
+                </th>
+                <th
+                  className="px-6 py-4 cursor-pointer min-w-[120px] hover:bg-blue-50 transition-colors"
+                  onClick={() => {
+                    if (sortBy === "tanggal") {
+                      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                    } else {
+                      setSortBy("tanggal");
+                      setSortOrder("desc");
+                    }
+                  }}
                 >
+                  <div className="flex items-center gap-2">
+                    Tanggal{" "}
+                    {sortBy === "tanggal"
+                      ? sortOrder === "asc"
+                        ? "↑"
+                        : "↓"
+                      : ""}
+                  </div>
+                </th>
+                <th className="px-6 py-4 min-w-[200px]">Deskripsi</th>
+                <th className="px-6 py-4 min-w-[100px]">Foto</th>
+                <th className="px-6 py-4 min-w-[80px]">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Gunakan currentData untuk mapping */}
+              {currentData.length === 0 ? (
+                <tr>
                   <td
-                    className="px-6 py-4 text-gray-800 break-words font-medium hover:text-green-600 cursor-pointer"
-                    onClick={() => handleShowDetail(kegiatan)}
+                    colSpan="5"
+                    className="px-6 py-12 text-center text-gray-500"
                   >
-                    {kegiatan.judul}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {formatDateDisplay(kegiatan.tanggal)}
-                  </td>
-                  <td
-                    className="px-6 py-4 text-gray-700 break-words cursor-pointer hover:text-green-600"
-                    onClick={() => handleShowDetail(kegiatan)}
-                  >
-                    <div className="max-w-xs overflow-hidden">
-                      {kegiatan.deskripsi.length > 80
-                        ? kegiatan.deskripsi.substring(0, 80) + "..."
-                        : kegiatan.deskripsi}
-                    </div>
-                  </td>
-                  <td className="px-6 py-2">
-                    {kegiatan.foto ? (
-                      <img
-                        src={kegiatan.foto}
-                        alt={kegiatan.judul}
-                        className="w-16 h-16 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={() => handleShowDetail(kegiatan)}
-                      />
-                    ) : (
-                      <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
-                        <Image className="w-6 h-6 text-gray-400" />
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(i)}
-                        className="text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors"
-                        title="Edit kegiatan"
-                      >
-                        <FaEdit size={16} />
-                      </button>
-                      <button
-                        onClick={() =>
-                          showDeleteConfirmation(
-                            kegiatan.id_kegiatan,
-                            kegiatan.judul
-                          )
-                        }
-                        className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
-                        title="Hapus kegiatan"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                    <div className="flex flex-col items-center gap-2">
+                      <Calendar className="w-12 h-12 text-gray-300" />
+                      <p className="text-lg font-medium">
+                        {dataKegiatan.length === 0
+                          ? "Belum ada data kegiatan"
+                          : "Tidak ada data yang sesuai pencarian"}
+                      </p>
+                      <p className="text-sm">
+                        {dataKegiatan.length === 0
+                          ? "Kegiatan yang ditambahkan akan muncul di sini"
+                          : "Coba ubah kata kunci pencarian Anda"}
+                      </p>
                     </div>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                currentData.map((kegiatan, i) => (
+                  <tr
+                    key={kegiatan.id_kegiatan}
+                    className={`hover:bg-blue-50 transition-colors ${
+                      i % 2 === 0 ? "bg-white" : "bg-[#F9FBFF]"
+                    }`}
+                  >
+                    <td
+                      className="px-6 py-4 text-gray-800 break-words font-medium hover:text-green-600 cursor-pointer"
+                      onClick={() => handleShowDetail(kegiatan)}
+                    >
+                      {kegiatan.judul}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {formatDateDisplay(kegiatan.tanggal)}
+                    </td>
+                    <td
+                      className="px-6 py-4 text-gray-700 break-words cursor-pointer hover:text-green-600"
+                      onClick={() => handleShowDetail(kegiatan)}
+                    >
+                      <div className="max-w-xs overflow-hidden">
+                        {kegiatan.deskripsi.length > 80
+                          ? kegiatan.deskripsi.substring(0, 80) + "..."
+                          : kegiatan.deskripsi}
+                      </div>
+                    </td>
+                    <td className="px-6 py-2">
+                      {kegiatan.foto ? (
+                        <img
+                          src={kegiatan.foto}
+                          alt={kegiatan.judul}
+                          className="w-16 h-16 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => handleShowDetail(kegiatan)}
+                        />
+                      ) : (
+                        <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+                          <Image className="w-6 h-6 text-gray-400" />
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(i)}
+                          className="text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors"
+                          title="Edit kegiatan"
+                        >
+                          <FaEdit size={16} />
+                        </button>
+                        <button
+                          onClick={() =>
+                            showDeleteConfirmation(
+                              kegiatan.id_kegiatan,
+                              kegiatan.judul
+                            )
+                          }
+                          className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                          title="Hapus kegiatan"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div className="pt-6 flex justify-end">
+      <div className="pt-6 pb-6 flex justify-between items-center px-6">
+        {totalPages > 1 ? (
+          <div className="flex items-center gap-2">
+            {/* Tombol Previous */}
+            <button
+              onClick={goToPrevPage}
+              disabled={currentPage === 1}
+              className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700"
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            <span className="px-3 py-2 border rounded-md hover:bg-gray-50">
+              {currentPage}
+            </span>
+
+            {/* Tombol Next */}
+            <button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-1 px-1 py-3 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        ) : (
+          <div /> // Placeholder if no pagination is needed
+        )}
         <button
-          className="flex items-center gap-2 px-4 py-2 bg-btn text-white rounded text-lg transition-colors shadow-md"
+          className="flex items-center gap-2 px-4 py-2 bg-btn text-white rounded-lg text-lg transition-colors shadow-md hover:bg-blue-700"
           onClick={() => {
             setForm({
               judul: "",
@@ -704,8 +779,8 @@ export default function HalamanKegiatan() {
 
       {/* Modal Tambah/Edit */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-30 bg-opacity-30">
-          <div className="bg-white w-full max-w-4xl rounded-xl shadow-xl border border-gray-200 p-10 mx-4">
+        <div className="fixed inset-0 flex items-center justify-center z-30 bg-black/30 backdrop-blur-sm p-4">
+          <div className="bg-white w-full max-w-4xl rounded-xl shadow-2xl border border-gray-200 p-10 mx-4 relative">
             <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-6">
               {editIndex !== null ? "Edit Kegiatan" : "Tambah Kegiatan"}
             </h1>
@@ -714,13 +789,13 @@ export default function HalamanKegiatan() {
               <input
                 type="text"
                 placeholder="Judul"
-                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 value={form.judul}
                 onChange={(e) => setForm({ ...form, judul: e.target.value })}
               />
               <input
                 type="date"
-                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 value={form.tanggal}
                 onChange={(e) => setForm({ ...form, tanggal: e.target.value })}
               />
@@ -728,7 +803,7 @@ export default function HalamanKegiatan() {
               <div className="md:col-span-2">
                 <textarea
                   placeholder="Deskripsi"
-                  className="border border-gray-300 rounded-md px-3 py-2 w-full h-24 resize-vertical"
+                  className="border border-gray-300 rounded-md px-3 py-2 w-full h-24 resize-y focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   value={form.deskripsi}
                   onChange={(e) =>
                     setForm({ ...form, deskripsi: e.target.value })
@@ -738,7 +813,7 @@ export default function HalamanKegiatan() {
 
               {/* File Input untuk Foto */}
               <div className="md:col-span-2 flex flex-col gap-2">
-                <label className="text-sm font-medium">
+                <label className="text-sm font-medium text-gray-700">
                   Foto Kegiatan (Opsional)
                 </label>
                 <input
@@ -747,16 +822,21 @@ export default function HalamanKegiatan() {
                   onChange={(e) =>
                     setForm({ ...form, foto: e.target.files[0] })
                   }
-                  className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                  className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100"
                 />
 
                 {/* Preview foto baru */}
                 {form.foto && (
-                  <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                  <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
                     <img
                       src={URL.createObjectURL(form.foto)}
                       alt="Preview"
-                      className="w-16 h-16 rounded object-cover"
+                      className="w-16 h-16 rounded object-cover shadow-sm"
                     />
                     <div className="flex-1">
                       <span className="text-sm text-gray-600">
@@ -767,7 +847,7 @@ export default function HalamanKegiatan() {
                     <button
                       type="button"
                       onClick={() => setForm({ ...form, foto: null })}
-                      className="text-red-500 text-sm hover:text-red-700"
+                      className="text-red-500 text-sm hover:text-red-700 p-1 rounded-full hover:bg-red-50"
                     >
                       Hapus
                     </button>
@@ -776,17 +856,17 @@ export default function HalamanKegiatan() {
 
                 {/* Preview foto yang sudah ada (untuk edit) */}
                 {!form.foto && form.fotoURL && editIndex !== null && (
-                  <div className="flex items-center gap-2 p-2 bg-blue-50 rounded">
+                  <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
                     <img
                       src={form.fotoURL}
                       alt="Current"
-                      className="w-16 h-16 rounded object-cover"
+                      className="w-16 h-16 rounded object-cover shadow-sm"
                     />
                     <div className="flex-1">
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-blue-700">
                         Foto saat ini
                       </span>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-blue-600">
                         Pilih file baru untuk mengubah
                       </p>
                     </div>
@@ -795,20 +875,9 @@ export default function HalamanKegiatan() {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-4 border-t border-gray-200">
               <button
-                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium text-sm md:text-lg px-6 py-2 rounded-md mr-4 disabled:bg-gray-400"
-                onClick={handleSubmit}
-                disabled={loading}
-              >
-                {loading
-                  ? "Menyimpan..."
-                  : editIndex !== null
-                  ? "Simpan"
-                  : "Tambah"}
-              </button>
-              <button
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium text-sm md:text-lg px-6 py-2 rounded-md"
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium text-sm md:text-lg px-6 py-2 rounded-md mr-4 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 onClick={() => {
                   setShowModal(false);
                   setForm({
@@ -824,40 +893,41 @@ export default function HalamanKegiatan() {
               >
                 Batal
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Delete Confirmation */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 bg-opacity-40 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Konfirmasi Hapus
-            </h2>
-            <p className="text-gray-700 mb-6">
-              Apakah Anda yakin ingin menghapus kegiatan ini? Tindakan ini tidak
-              dapat dibatalkan.
-            </p>
-            <div className="flex justify-end gap-4">
               <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setDeleteIndex(null);
-                  setDeleteId(null);
-                }}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                className="bg-btn text-white font-medium text-sm md:text-lg px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                onClick={handleSubmit}
+                disabled={loading}
               >
-                Batal
-              </button>
-              <button
-                onClick={deleteKegiatan}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Hapus
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Menyimpan...
+                  </>
+                ) : editIndex !== null ? (
+                  "Simpan Perubahan"
+                ) : (
+                  "Tambah Kegiatan"
+                )}
               </button>
             </div>
+            {/* Close button for the modal */}
+            <button
+              onClick={() => {
+                setShowModal(false);
+                setForm({
+                  judul: "",
+                  tanggal: "",
+                  deskripsi: "",
+                  foto: null,
+                  fotoURL: "",
+                });
+                setEditIndex(null);
+              }}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold"
+              aria-label="Tutup"
+            >
+              &times;
+            </button>
           </div>
         </div>
       )}
