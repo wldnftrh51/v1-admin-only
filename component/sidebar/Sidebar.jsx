@@ -128,7 +128,7 @@ export default function Sidebar() {
 
       {/* Modal konfirmasi logout */}
       {showConfirmLogout && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-lg p-6 w-80 text-black">
             <h2 className="text-lg font-semibold mb-4">Konfirmasi Logout</h2>
             <p className="mb-6">Apakah Anda yakin ingin keluar?</p>
