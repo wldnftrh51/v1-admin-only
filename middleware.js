@@ -6,7 +6,7 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'your_jwt_secret_key'
 )
 
-const protectedRoutes = ['/dashboard', '/guru', '/kegiatan', '/pendaftar', '/siswa', '/testimoni']
+const protectedRoutes = ['/dashboard', '/guru', '/kegiatan', '/pendaftar', '/siswa','/pengguna', '/testimoni']
 const publicRoutes = ['/']
 
 export async function middleware(request) {
