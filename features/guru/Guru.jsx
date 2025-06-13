@@ -656,7 +656,7 @@ export default function HalamanGuru() {
 
       {/* Modal Detail Guru */}
       {showDetailModal && selectedGuru && (
-        <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-opacity-50 flex justify-center bg-black/40 backdrop-blur-sm items-center z-50">
           <div className="bg-white rounded-xl p-8 max-w-2xl w-full shadow-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-800">Detail Guru</h3>
@@ -769,7 +769,7 @@ export default function HalamanGuru() {
       {/* Modal Tambah/Edit Guru */}
       {showModal && (
         <div
-          className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50"
+          className="fixed inset-0 bg-opacity-50 flex bg-black/40 backdrop-blur-sm justify-center items-center z-50"
           onClick={() => {
             setShowModal(false);
             resetForm();

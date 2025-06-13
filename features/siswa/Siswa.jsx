@@ -697,7 +697,7 @@ export default function HalamanSiswa() {
 
       {/* Modal Detail Siswa */}
       {showDetailModal && selectedSiswa && (
-        <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50 bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-xl p-8 max-w-2xl w-full shadow-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-800">Detail Siswa</h3>
@@ -838,7 +838,7 @@ export default function HalamanSiswa() {
 
       {/* MODAL */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-30 flex justify-center items-center px-2 md:px-4  md:pl-64">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 flex justify-center items-center px-2 md:px-4  md:pl-64">
           <div className="bg-white max-w-6xl w-full rounded-xl shadow-xl border border-gray-200 p-8 overflow-y-auto max-h-[90vh]">
             <h2 className="text-2xl font-semibold mb-6 text-center">
               {editMode ? "Edit Siswa" : "Tambah Siswa"}
